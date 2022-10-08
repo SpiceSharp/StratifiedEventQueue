@@ -101,7 +101,11 @@ namespace StratifiedEventQueue.Simulation
 
                     // Get the next active event and execute it
                     var @event = _active.Extract();
-                    @event.Execute(this);
+                    if (@event != null)
+                    {
+                        @event.Execute(this);
+                        @event.Release();
+                    }
                 }
             }
         }

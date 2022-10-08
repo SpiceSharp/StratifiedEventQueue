@@ -19,5 +19,13 @@ namespace StratifiedEventQueue.Events
         /// </summary>
         /// <param name="scheduler">The scheduler.</param>
         public abstract void Execute(Scheduler scheduler);
+
+        /// <summary>
+        /// Releases the event from the scheduler.
+        /// </summary>
+        /// <remarks>
+        /// This method allows events to be reused to avoid allocation of large number of objects.
+        /// </remarks>
+        public abstract void Release();
     }
 }

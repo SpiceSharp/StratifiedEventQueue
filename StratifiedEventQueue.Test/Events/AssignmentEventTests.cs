@@ -22,7 +22,8 @@ namespace StratifiedEventQueue.Test.Events
             var event1 = AssignmentEvent<int>.Create(va, 3);
             Assert.Equal(3, event1.Value);
             Assert.Equal(va, event1.Variable);
-            event1.Execute(null);
+            event1.Release();
+
             var event2 = AssignmentEvent<int>.Create(vb, 4);
             Assert.Equal(4, event2.Value);
             Assert.Equal(vb, event2.Variable);

@@ -25,17 +25,19 @@ namespace StratifiedEventQueue.Simulation
         public Event Extract()
         {
             Event @event;
-            do
+            while (_events.Count > 0)
             {
-                if (_events.Count > 0)
-                    @event = _events.Dequeue();
-                else
+                @event = _events.Dequeue();
+                if (@event.Descheduled)
+                {
+                    // Release the event for reuse
+                    @event.Release();
                     @event = null;
+                }
+                else
+                    return @event;
             }
-            while (@event != null && @event.Descheduled);
-
-            // This should be an event that is not descheduled, or null
-            return @event;
+            return null;
         }
 
         /// <summary>

@@ -9,6 +9,7 @@ namespace StratifiedEventQueue.Events
     /// An event that describes an assignment to a variable when executed. The
     /// value is calculated at the moment of execution.
     /// </summary>
+    /// <typeparam name="T">The value type of the variable.</typeparam>
     public class DeferredAssignmentEvent<T> : Event where T : IEquatable<T>
     {
         private static readonly Queue<DeferredAssignmentEvent<T>> _eventPool = new Queue<DeferredAssignmentEvent<T>>();
@@ -35,7 +36,11 @@ namespace StratifiedEventQueue.Events
         {
             T value = Func();
             Variable.Update(scheduler, value);
+        }
 
+        /// <inheritdoc />
+        public override void Release()
+        {
             // Allow object reuse
             _eventPool.Enqueue(this);
         }

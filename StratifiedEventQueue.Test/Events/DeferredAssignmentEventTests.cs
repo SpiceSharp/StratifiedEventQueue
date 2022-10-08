@@ -26,7 +26,7 @@ namespace StratifiedEventQueue.Test.Events
             var event1 = DeferredAssignmentEvent<int>.Create(va, fa);
             Assert.Equal(fa, event1.Func);
             Assert.Equal(va, event1.Variable);
-            event1.Execute(null);
+            event1.Release();
 
             var event2 = DeferredAssignmentEvent<int>.Create(vb, fb);
             Assert.Equal(fb, event2.Func);

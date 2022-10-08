@@ -8,7 +8,7 @@ namespace StratifiedEventQueue.Events
     /// <summary>
     /// An event that describes an assignment to a variable when executed.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The value type of the variable.</typeparam>
     public class AssignmentEvent<T> : Event where T : IEquatable<T>
     {
         private static readonly Queue<AssignmentEvent<T>> _eventPool = new Queue<AssignmentEvent<T>>(20);
@@ -34,8 +34,11 @@ namespace StratifiedEventQueue.Events
         public override void Execute(Scheduler scheduler)
         {
             Variable.Update(scheduler, Value);
+        }
 
-            // Allow object reuse
+        /// <inheritdoc />
+        public override void Release()
+        {
             _eventPool.Enqueue(this);
         }
 
