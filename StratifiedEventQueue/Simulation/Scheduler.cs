@@ -1,4 +1,5 @@
 ﻿using StratifiedEventQueue.Events;
+using System;
 
 namespace StratifiedEventQueue.Simulation
 {
@@ -32,7 +33,7 @@ namespace StratifiedEventQueue.Simulation
         /// Schedules a new event in the active event queue.
         /// </summary>
         /// <param name="event">The event.</param>
-        public void Schedule(Event @event) => _active.Add(@event);
+        public void Schedule(Event @event) => _active.Add(@event ?? throw new ArgumentNullException(nameof(@event)));
 
         /// <summary>
         /// Schedules a new event in the inactive event queue.
@@ -41,6 +42,8 @@ namespace StratifiedEventQueue.Simulation
         /// <param name="event">The event.</param>
         public void ScheduleInactive(ulong delay, Event @event)
         {
+            if (@event == null)
+                throw new ArgumentNullException(nameof(@event));
             var eventQueue = _tree.GetOrAdd(CurrentTime + delay);
             eventQueue.Inactive.Add(@event);
         }
@@ -52,6 +55,8 @@ namespace StratifiedEventQueue.Simulation
         /// <param name="event">The event.</param>
         public void ScheduleNonBlocking(ulong delay, Event @event)
         {
+            if (@event == null)
+                throw new ArgumentNullException(nameof(@event));
             var eventQueue = _tree.GetOrAdd(CurrentTime + delay);
             eventQueue.NonBlocking.Add(@event);
         }
@@ -67,6 +72,7 @@ namespace StratifiedEventQueue.Simulation
         /// </summary>
         public void Process()
         {
+            Event @event;
             while (_tree.Count > 0)
             {
                 var node = _tree.PopFirst();
@@ -82,26 +88,25 @@ namespace StratifiedEventQueue.Simulation
                     {
                         if (events.Inactive.Count > 0)
                         {
-                            while (events.Inactive.Count > 0)
-                                _active.Add(events.Inactive.Extract());
+                            while ((@event = events.Inactive.Extract()) != null)
+                                _active.Add(@event);
                         }
                         else if (events.NonBlocking.Count > 0)
                         {
-                            while (events.NonBlocking.Count > 0)
-                                _active.Add(events.NonBlocking.Extract());
+                            while ((@event = events.NonBlocking.Extract()) != null)
+                                _active.Add(@event);
                         }
                         else if (_monitor.Count > 0)
                         {
-                            while (_monitor.Count > 0)
-                                _active.Add(_monitor.Extract());
+                            while ((@event = _monitor.Extract()) != null)
+                                _active.Add(@event);
                         }
                         else
                             break;
                     }
 
                     // Get the next active event and execute it
-                    var @event = _active.Extract();
-                    if (@event != null)
+                    while ((@event = _active.Extract()) != null)
                     {
                         @event.Execute(this);
                         @event.Release();

@@ -9,7 +9,7 @@ namespace StratifiedEventQueue.Events
     /// An event that describes an assignment to a variable when executed.
     /// </summary>
     /// <typeparam name="T">The value type of the variable.</typeparam>
-    public class AssignmentEvent<T> : Event where T : IEquatable<T>
+    public class AssignmentEvent<T> : Event
     {
         private static readonly Queue<AssignmentEvent<T>> _eventPool = new Queue<AssignmentEvent<T>>(20);
 
@@ -57,6 +57,7 @@ namespace StratifiedEventQueue.Events
                 @event = new AssignmentEvent<T>();
             @event.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             @event.Value = value;
+            @event.Descheduled = false;
             return @event;
         }
     }

@@ -7,7 +7,7 @@ namespace StratifiedEventQueue.States
     /// <summary>
     /// Event arguments for a variable that changed.
     /// </summary>
-    public class VariableValueChangedEventArgs<T> : EventArgs where T : IEquatable<T>
+    public class VariableValueChangedEventArgs<T> : EventArgs
     {
         private static readonly Queue<VariableValueChangedEventArgs<T>> _pool = new Queue<VariableValueChangedEventArgs<T>>(InitialPoolSize);
 

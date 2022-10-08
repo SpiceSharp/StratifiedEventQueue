@@ -54,6 +54,7 @@ namespace StratifiedEventQueue.Events
             else
                 result = new CallbackEvent();
             result.Action = action ?? throw new ArgumentNullException(nameof(action));
+            result.Descheduled = false;
             return result;
         }
     }

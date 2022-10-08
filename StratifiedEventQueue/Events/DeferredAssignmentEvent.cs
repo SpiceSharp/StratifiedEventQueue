@@ -10,7 +10,7 @@ namespace StratifiedEventQueue.Events
     /// value is calculated at the moment of execution.
     /// </summary>
     /// <typeparam name="T">The value type of the variable.</typeparam>
-    public class DeferredAssignmentEvent<T> : Event where T : IEquatable<T>
+    public class DeferredAssignmentEvent<T> : Event
     {
         private static readonly Queue<DeferredAssignmentEvent<T>> _eventPool = new Queue<DeferredAssignmentEvent<T>>();
 
@@ -61,6 +61,7 @@ namespace StratifiedEventQueue.Events
                 @event = new DeferredAssignmentEvent<T>();
             @event.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             @event.Func = function ?? throw new ArgumentNullException(nameof(function));
+            @event.Descheduled = false;
             return @event;
         }
     }

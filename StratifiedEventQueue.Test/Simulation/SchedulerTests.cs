@@ -76,31 +76,36 @@ namespace StratifiedEventQueue.Test.Simulation
             // This test demonstrates descheduling, which is necessary when simulating
             // inertial delays
             // We emulate an inverter with a delay in rise and fall time
-            var input = new Variable<bool>("IN");
-            var output = new Variable<bool>("OUT");
+            var input = new Variable<byte>("IN");
+            var output = new Variable<byte>("OUT");
             var scheduler = new Scheduler();
 
             // We first create a waveform to test our inertial delay
-            CreateWaveform(scheduler, input, new ulong[] { 0, 1, 2, 4, 6, 7, 8, 11 }, new bool[] { false, true, false, true, false, true, false, true });
+            CreateWaveform(scheduler, input, new ulong[] { 0, 1, 2, 4, 6, 7, 8, 11 }, SignalValue.FromStringBinary("01010101"));
 
             // Now let us create an inertial delay inverter
             Event? nextEvent = null;
             ulong nextEventTime = 0;
-            void InertialDelayInverter(object? sender, VariableValueChangedEventArgs<bool> args)
+            void InertialDelayInverter(object? sender, VariableValueChangedEventArgs<byte> args)
             {
                 ulong delay;
-                bool value;
-                if (args.Variable.Value == false)
+                byte value;
+                if (args.Variable.Value == SignalValue.L)
                 {
                     // Rise time, 2 ticks
                     delay = 2;
-                    value = true;
+                    value = SignalValue.H;
                 }
-                else
+                else if (args.Variable.Value == SignalValue.H)
                 {
                     // Fall time, 1 tick
                     delay = 1;
-                    value = false;
+                    value = SignalValue.L;
+                }
+                else
+                {
+                    delay = 0;
+                    value = SignalValue.X;
                 }
 
                 ulong nextTime = args.Scheduler.CurrentTime + delay;
@@ -111,7 +116,7 @@ namespace StratifiedEventQueue.Test.Simulation
                     // already scheduled event
                     nextEvent.Descheduled = true;
                 }
-                nextEvent = AssignmentEvent<bool>.Create(output, value);
+                nextEvent = AssignmentEvent<byte>.Create(output, value);
                 nextEventTime = nextTime;
                 scheduler.ScheduleInactive(delay, nextEvent);
             }
@@ -119,9 +124,9 @@ namespace StratifiedEventQueue.Test.Simulation
 
             // We will then test for a specific waveform
             int index = 0;
-            var expectedTime = new ulong[] { 4, 5, 10, 12 };
-            var expectedValues = new bool[] { true, false, true, false };
-            void CheckWaveform(object? sender, VariableValueChangedEventArgs<bool> args)
+            var expectedTime = new ulong[] { 2, 4, 5, 10, 12 };
+            var expectedValues = SignalValue.FromStringBinary("01010");
+            void CheckWaveform(object? sender, VariableValueChangedEventArgs<byte> args)
             {
                 Assert.Equal(expectedTime[index], args.Scheduler.CurrentTime);
                 Assert.Equal(expectedValues[index], args.Variable.Value);
@@ -134,7 +139,7 @@ namespace StratifiedEventQueue.Test.Simulation
             Assert.Equal(index, expectedTime.Length);
         }
 
-        private void CreateWaveform<T>(Scheduler scheduler, Variable<T> variable, ulong[] time, T[] values) where T : IEquatable<T>
+        private void CreateWaveform<T>(Scheduler scheduler, Variable<T> variable, ulong[] time, T[] values)
         {
             for (int i = 0; i < time.Length; i++)
             {

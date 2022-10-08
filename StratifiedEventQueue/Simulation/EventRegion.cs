@@ -30,9 +30,8 @@ namespace StratifiedEventQueue.Simulation
                 @event = _events.Dequeue();
                 if (@event.Descheduled)
                 {
-                    // Release the event for reuse
+                    // Simply release the event without giving it to the caller
                     @event.Release();
-                    @event = null;
                 }
                 else
                     return @event;
