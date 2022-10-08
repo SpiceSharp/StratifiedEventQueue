@@ -26,9 +26,6 @@ namespace StratifiedEventQueue.Events
         /// <summary>
         /// Creates a new <see cref="AssignmentEvent{T}"/>.
         /// </summary>
-        /// <param name="variable">The variable.</param>
-        /// <param name="value">The value.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="variable"/> is <c>null</c>.</exception>
         private AssignmentEvent()
         {
         }
@@ -43,7 +40,7 @@ namespace StratifiedEventQueue.Events
         }
 
         /// <summary>
-        /// Creates a new <see cref="AssignmentEvent{T}"/>, but uses a pool of create objects.
+        /// Creates a new <see cref="AssignmentEvent{T}"/>, but uses a pool of objects.
         /// </summary>
         /// <param name="variable"></param>
         /// <param name="value"></param>
@@ -55,7 +52,7 @@ namespace StratifiedEventQueue.Events
                 @event = _eventPool.Dequeue();
             else
                 @event = new AssignmentEvent<T>();
-            @event.Variable = variable;
+            @event.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             @event.Value = value;
             return @event;
         }
