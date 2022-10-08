@@ -47,6 +47,126 @@ namespace StratifiedEventQueue
         public int GetHashCode(byte obj) => obj;
 
         /// <summary>
+        /// And gate.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>The result.</returns>
+        public static byte And(byte a, byte b)
+        {
+            if (a == L || b == L)
+                return L;
+            if (a == H && b == H)
+                return H;
+            return X;
+        }
+
+        /// <summary>
+        /// Nand gate.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>The result.</returns>
+        public static byte Nand(byte a, byte b)
+        {
+            if (a == L || b == L)
+                return H;
+            if (a == H && b == H)
+                return L;
+            return X;
+        }
+
+        /// <summary>
+        /// Or gate.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>The result.</returns>
+        public static byte Or(byte a, byte b)
+        {
+            if (a == H || b == H)
+                return H;
+            if (a == L && b == L)
+                return L;
+            return X;
+        }
+
+        /// <summary>
+        /// Nor gate.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>The result.</returns>
+        public static byte Nor(byte a, byte b)
+        {
+            if (a == H || b == H)
+                return L;
+            if (a == L && b == L)
+                return H;
+            return X;
+        }
+
+        /// <summary>
+        /// Xor gate.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>The result.</returns>
+        public static byte Xor(byte a, byte b)
+        {
+            if (a == L && b == H || a == H && b == L)
+                return H;
+            if (a == L && b == L || a == H && b == H)
+                return L;
+            return X;
+        }
+
+        /// <summary>
+        /// Xnor gate.
+        /// </summary>
+        /// <param name="a">The first argument.</param>
+        /// <param name="b">The second argument.</param>
+        /// <returns>The result.</returns>
+        public static byte Xnor(byte a, byte b)
+        {
+            if (a == L && b == H || a == H && b == L)
+                return L;
+            if (a == L && b == L || a == H && b == H)
+                return H;
+            return X;
+        }
+
+        /// <summary>
+        /// Buffer.
+        /// </summary>
+        /// <param name="a">The argument.</param>
+        /// <returns>The second argument.</returns>
+        public static byte Buf(byte a)
+        {
+            if (a == Z)
+                return X;
+            return a;
+        }
+
+        /// <summary>
+        /// Not gate.
+        /// </summary>
+        /// <param name="a">The argument.</param>
+        /// <returns>The result.</returns>
+        public static byte Not(byte a)
+        {
+            switch (a)
+            {
+                case L:
+                    return H;
+                case H:
+                    return L;
+                default:
+                    return X;
+            }
+        }
+
+        /// <summary>
         /// Converts a character to a signal value.
         /// </summary>
         /// <param name="c">The character.</param>

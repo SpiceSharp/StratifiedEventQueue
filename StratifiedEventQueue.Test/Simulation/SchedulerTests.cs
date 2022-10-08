@@ -88,25 +88,13 @@ namespace StratifiedEventQueue.Test.Simulation
             ulong nextEventTime = 0;
             void InertialDelayInverter(object? sender, VariableValueChangedEventArgs<byte> args)
             {
-                ulong delay;
-                byte value;
-                if (args.Variable.Value == SignalValue.L)
+                byte value = SignalValue.Not(args.Variable.Value);
+                ulong delay = args.Variable.Value switch
                 {
-                    // Rise time, 2 ticks
-                    delay = 2;
-                    value = SignalValue.H;
-                }
-                else if (args.Variable.Value == SignalValue.H)
-                {
-                    // Fall time, 1 tick
-                    delay = 1;
-                    value = SignalValue.L;
-                }
-                else
-                {
-                    delay = 0;
-                    value = SignalValue.X;
-                }
+                    SignalValue.L => 2,
+                    SignalValue.H => 1,
+                    _ => 0
+                };
 
                 ulong nextTime = args.Scheduler.CurrentTime + delay;
                 if (nextTime <= nextEventTime && nextEvent != null)
