@@ -1,6 +1,7 @@
 ﻿using StratifiedEventQueue.Simulation;
+using StratifiedEventQueue.States;
 
-namespace StratifiedEventQueue.Test.Simulation
+namespace StratifiedEventQueue.Test.States
 {
     public class VariableTests
     {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using StratifiedEventQueue.Simulation;
+using StratifiedEventQueue.States;
 
-namespace StratifiedEventQueue.Simulation
+namespace StratifiedEventQueue.Events
 {
     /// <summary>
     /// An event that describes an assignment to a variable when executed.

@@ -1,6 +1,7 @@
 ﻿using System;
+using StratifiedEventQueue.Simulation;
 
-namespace StratifiedEventQueue.Simulation
+namespace StratifiedEventQueue.States
 {
     /// <summary>
     /// A variable that can be changed and emits events when it does.

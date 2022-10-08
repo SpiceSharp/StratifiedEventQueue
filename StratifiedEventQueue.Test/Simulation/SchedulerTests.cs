@@ -1,5 +1,6 @@
 using StratifiedEventQueue.Events;
 using StratifiedEventQueue.Simulation;
+using StratifiedEventQueue.States;
 
 namespace StratifiedEventQueue.Test.Simulation
 {

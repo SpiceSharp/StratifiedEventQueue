@@ -1,4 +1,6 @@
-﻿namespace StratifiedEventQueue.Simulation
+﻿using StratifiedEventQueue.Simulation;
+
+namespace StratifiedEventQueue.Events
 {
     /// <summary>
     /// Describes an event.

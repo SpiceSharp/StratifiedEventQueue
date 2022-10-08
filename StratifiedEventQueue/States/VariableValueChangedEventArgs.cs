@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using StratifiedEventQueue.Simulation;
 
-namespace StratifiedEventQueue.Simulation
+namespace StratifiedEventQueue.States
 {
     /// <summary>
     /// Event arguments for a variable that changed.

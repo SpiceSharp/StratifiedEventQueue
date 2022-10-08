@@ -1,4 +1,6 @@
-﻿namespace StratifiedEventQueue.Simulation
+﻿using StratifiedEventQueue.Events;
+
+namespace StratifiedEventQueue.Simulation
 {
     /// <summary>
     /// A scheduler for tracking time.
