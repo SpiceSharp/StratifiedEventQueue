@@ -19,7 +19,7 @@ namespace StratifiedEventQueue.Events
         /// <summary>
         /// Gets the action that will be executed for the event.
         /// </summary>
-        public Action<Scheduler> Action { get; private set; }
+        public Action<IScheduler> Action { get; private set; }
 
         /// <summary>
         /// Creates a new <see cref="CallbackEvent"/>.
@@ -29,7 +29,7 @@ namespace StratifiedEventQueue.Events
         }
 
         /// <inheritdoc />
-        public override void Execute(Scheduler scheduler)
+        public override void Execute(IScheduler scheduler)
         {
             Action?.Invoke(scheduler);
         }
@@ -46,7 +46,7 @@ namespace StratifiedEventQueue.Events
         /// <param name="action">The action that should be called when the event is executed.</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="action"/> is <c>null</c>.</exception>
-        public static CallbackEvent Create(Action<Scheduler> action)
+        public static CallbackEvent Create(Action<IScheduler> action)
         {
             CallbackEvent result;
             if (_eventPool.Count > 0)

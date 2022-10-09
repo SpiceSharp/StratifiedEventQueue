@@ -15,7 +15,7 @@ namespace StratifiedEventQueue.Test.Simulation
             // This example tests regular, inactive event scheduling at various delays before simulation
 
             int index = 0;
-            void CheckTime(Scheduler scheduler)
+            void CheckTime(IScheduler scheduler)
             {
                 Assert.Equal((ulong)(index * 10), scheduler.CurrentTime);
                 index++;
@@ -49,7 +49,7 @@ namespace StratifiedEventQueue.Test.Simulation
             scheduler.ScheduleInactive(50, AssignmentEvent<bool>.Create(clk, true));
 
             bool expected = false;
-            void CheckValue(Scheduler scheduler)
+            void CheckValue(IScheduler scheduler)
             {
                 if (clk != null)
                 {

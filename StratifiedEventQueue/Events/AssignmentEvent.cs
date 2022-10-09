@@ -31,7 +31,7 @@ namespace StratifiedEventQueue.Events
         }
 
         /// <inheritdoc />
-        public override void Execute(Scheduler scheduler)
+        public override void Execute(IScheduler scheduler)
         {
             Variable.Update(scheduler, Value);
         }

@@ -6,14 +6,12 @@ namespace StratifiedEventQueue.Simulation
     /// <summary>
     /// A scheduler for tracking time.
     /// </summary>
-    public class Scheduler
+    public class Scheduler : IScheduler
     {
         private readonly EventRegion _active = new EventRegion(), _monitor = new EventRegion();
         private readonly SplayTree _tree = new SplayTree();
 
-        /// <summary>
-        /// Gets the current time.
-        /// </summary>
+        /// <inheritdoc />
         public ulong CurrentTime { get; private set; }
 
         /// <summary>
@@ -29,17 +27,10 @@ namespace StratifiedEventQueue.Simulation
             CurrentTime = 0;
         }
 
-        /// <summary>
-        /// Schedules a new event in the active event queue.
-        /// </summary>
-        /// <param name="event">The event.</param>
+        /// <inheritdoc />
         public void Schedule(Event @event) => _active.Add(@event ?? throw new ArgumentNullException(nameof(@event)));
 
-        /// <summary>
-        /// Schedules a new event in the inactive event queue.
-        /// </summary>
-        /// <param name="delay">The delay when the event needs to be activated.</param>
-        /// <param name="event">The event.</param>
+        /// <inheritdoc />
         public void ScheduleInactive(ulong delay, Event @event)
         {
             if (@event == null)
@@ -48,11 +39,7 @@ namespace StratifiedEventQueue.Simulation
             eventQueue.Inactive.Add(@event);
         }
 
-        /// <summary>
-        /// Schedules a new event in the non-blocking event queue.
-        /// </summary>
-        /// <param name="delay">The delay when the event needs to be activated.</param>
-        /// <param name="event">The event.</param>
+        /// <inheritdoc />
         public void ScheduleNonBlocking(ulong delay, Event @event)
         {
             if (@event == null)
@@ -61,15 +48,10 @@ namespace StratifiedEventQueue.Simulation
             eventQueue.NonBlocking.Add(@event);
         }
 
-        /// <summary>
-        /// Schedules a new event in the monitor event queue.
-        /// </summary>
-        /// <param name="event">The event.</param>
+        /// <inheritdoc />
         public void ScheduleMonitor(Event @event) => _monitor.Add(@event);
 
-        /// <summary>
-        /// Processes all items in the event queue.
-        /// </summary>
+        /// <inheritdoc />
         public void Process()
         {
             Event @event;

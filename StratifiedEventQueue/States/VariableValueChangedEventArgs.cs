@@ -22,7 +22,7 @@ namespace StratifiedEventQueue.States
         /// <remarks>
         /// Making this settable allows variables to only create a single class.
         /// </remarks>
-        public Scheduler Scheduler { get; private set; }
+        public IScheduler Scheduler { get; private set; }
 
         /// <summary>
         /// Gets the variable that has changed.
@@ -52,7 +52,7 @@ namespace StratifiedEventQueue.States
         /// <param name="scheduler">The scheduler.</param>
         /// <param name="variable">The variable.</param>
         /// <returns>The event arguments.</returns>
-        public static VariableValueChangedEventArgs<T> Create(Scheduler scheduler, Variable<T> variable)
+        public static VariableValueChangedEventArgs<T> Create(IScheduler scheduler, Variable<T> variable)
         {
             VariableValueChangedEventArgs<T> result;
             if (_pool.Count > 0)

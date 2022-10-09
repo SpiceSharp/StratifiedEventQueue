@@ -18,7 +18,7 @@ namespace StratifiedEventQueue.Events
         /// Executes and releases the event from the given scheduler.
         /// </summary>
         /// <param name="scheduler">The scheduler.</param>
-        public abstract void Execute(Scheduler scheduler);
+        public abstract void Execute(IScheduler scheduler);
 
         /// <summary>
         /// Releases the event from the scheduler.

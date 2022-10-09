@@ -62,7 +62,7 @@ namespace StratifiedEventQueue.States
         /// </summary>
         /// <param name="scheduler">The scheduler.</param>
         /// <param name="value">The value.</param>
-        public void Update(Scheduler scheduler, T value)
+        public void Update(IScheduler scheduler, T value)
         {
             if (Comparer.Equals(Value, value))
                 return; // No change
