@@ -57,7 +57,7 @@ namespace StratifiedEventQueue.Simulation
             Event @event;
             while (_tree.Count > 0)
             {
-                var node = _tree.PopFirst();
+                var node = _tree.PeekFirst();
                 if (node.Key > MaxTime)
                     return;
                 var events = node.Value;
@@ -94,6 +94,9 @@ namespace StratifiedEventQueue.Simulation
                         @event.Release();
                     }
                 }
+
+                // Remove the processed event queue
+                _tree.PopFirst();
             }
         }
     }
