@@ -127,6 +127,101 @@ namespace StratifiedEventQueue.Test.Simulation
             Assert.Equal(index, expectedTime.Length);
         }
 
+        [Fact]
+        public void When_EnabledTflipflop_Expect_Reference()
+        {
+            // This example demonstrates an enabled T-flip-flop
+            var scheduler = new Scheduler();
+            var clk = new LogicVariable("clk", Logic.L);
+            var output = new LogicVariable("out", Logic.L);
+
+            // Starts the clock
+            scheduler.ScheduleInactive(5, AssignmentEvent<byte>.Create(clk, Logic.H));
+
+            // Keeps the clock going
+            clk.Changed += (sender, args) =>
+            {
+                // Invert the clock
+                args.Scheduler.ScheduleInactive(5, AssignmentEvent<byte>.Create(clk, Logic.Not(clk.Value)));
+            };
+
+            // The T-flip-flop definition, with only sensitivity to the clock
+            clk.Changed += (sender, args) =>
+            {
+                if (clk.OldValue == Logic.L && clk.Value == Logic.H)
+                {
+                    // Posedge reached, toggle the output
+                    args.Scheduler.ScheduleInactive(0, AssignmentEvent<byte>.Create(output, Logic.Not(output.Value)));
+                }
+            };
+
+            // Checking the output
+            int index = 0;
+            void Check(object? sender, VariableValueChangedEventArgs<byte> args)
+            {
+                Assert.Equal((ulong)(5 + index * 10), args.Scheduler.CurrentTime);
+                if ((index % 2) == 0)
+                    Assert.Equal(Logic.H, output.Value);
+                else
+                    Assert.Equal(Logic.L, output.Value);
+                index++;
+            }
+            output.Changed += Check;
+
+            scheduler.MaxTime = 1000;
+            scheduler.Process();
+            Assert.Equal(100, index); // There should be 100 toggles in total
+        }
+
+        [Fact]
+        public void When_FlipFlopAsyncReset_Expect_Reference()
+        {
+            // This example emulates a flip-flop with asynchronous reset
+            var scheduler = new Scheduler();
+            var d = new LogicVariable("d");
+            var clk = new LogicVariable("clk");
+            var rst = new LogicVariable("rst");
+            var q = new LogicVariable("q");
+
+            // Define the data
+            scheduler.ScheduleInactive(0, WaveformEvent<byte>.Create(d, 10, new byte[] { Logic.L, Logic.H }));
+
+            // Define the clock
+            scheduler.ScheduleInactive(0, new TikTokEvent<byte>(clk, 5, Logic.L, Logic.H));
+
+            // Define the reset
+            scheduler.ScheduleInactive(0, WaveformEvent<byte>.Create(rst, 22, new byte[] { Logic.L, Logic.H }));
+
+            // Define the working of the flip-flop
+            void Dflipflop(IScheduler scheduler)
+            {
+                if (rst.Value == Logic.H)
+                    scheduler.Schedule(AssignmentEvent<byte>.Create(q, Logic.L));
+                else if (clk.Value == Logic.H && clk.OldValue == Logic.L && clk.ChangeTime == scheduler.CurrentTime)
+                    scheduler.Schedule(AssignmentEvent<byte>.Create(q, d.Value));
+            }
+            clk.Changed += (sender, args) => Dflipflop(args.Scheduler);
+            rst.Changed += (sender, args) => Dflipflop(args.Scheduler);
+
+            // Check the output
+            var times = new ulong[] { 5, 15, 22  };
+            var values = new byte[] { Logic.L, Logic.H, Logic.L };
+            int index = 0;
+            q.Changed += (sender, args) =>
+            {
+                Assert.Equal(times[index], args.Scheduler.CurrentTime);
+                Assert.Equal(values[index], args.Variable.Value);
+                index++;
+            };
+
+            // Execute
+            scheduler.MaxTime = 50;
+            scheduler.Process();
+
+            // Make sure we have finished
+            Assert.Equal(times.Length, index);
+        }
+
         private void CreateWaveform<T>(Scheduler scheduler, Variable<T> variable, ulong[] time, T[] values)
         {
             for (int i = 0; i < time.Length; i++)

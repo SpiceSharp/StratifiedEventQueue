@@ -36,6 +36,11 @@ namespace StratifiedEventQueue.States
         public T Value { get; private set; }
 
         /// <summary>
+        /// Gets the time when the last change happened.
+        /// </summary>
+        public ulong ChangeTime { get; private set; }
+
+        /// <summary>
         /// Creates a new <see cref="Variable{T}"/>.
         /// </summary>
         /// <param name="name">The name of the variable.</param>
@@ -59,6 +64,7 @@ namespace StratifiedEventQueue.States
                 return; // No change
 
             // Update the variable
+            ChangeTime = scheduler.CurrentTime;
             OldValue = Value;
             Value = value;
             OnChanged(VariableValueChangedEventArgs<T>.Create(scheduler, this));
