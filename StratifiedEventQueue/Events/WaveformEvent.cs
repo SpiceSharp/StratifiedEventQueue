@@ -2,6 +2,7 @@
 using StratifiedEventQueue.States;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace StratifiedEventQueue.Events
 {
@@ -82,6 +83,7 @@ namespace StratifiedEventQueue.Events
         /// <param name="variable">The variable.</param>
         /// <param name="points">The points.</param>
         /// <returns>The waveform event.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="variable"/> or <paramref name="points"/> is <c>null</c>.</exception>
         public static WaveformEvent<T> Create(Variable<T> variable, IEnumerable<KeyValuePair<ulong, T>> points)
         {
             WaveformEvent<T> result;
@@ -91,6 +93,33 @@ namespace StratifiedEventQueue.Events
                 result = new WaveformEvent<T>();
             result.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             result._enumerator = points?.GetEnumerator() ?? throw new ArgumentNullException(nameof(points)); ;
+            result._isFirst = true;
+            result.Descheduled = false;
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="WaveformEvent{T}"/>.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        /// <param name="period">The period between values.</param>
+        /// <param name="values">The values.</param>
+        /// <returns>The waveform event.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="variable"/> or <paramref name="values" /> is <c>ull</c>.</exception>
+        public static WaveformEvent<T> Create(Variable<T> variable, ulong period, IEnumerable<T> values)
+        {
+            WaveformEvent<T> result;
+            if (_eventPool.Count > 0)
+                result = _eventPool.Dequeue();
+            else
+                result = new WaveformEvent<T>();
+            result.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
+            result._enumerator = values?.Select((v, index) =>
+            {
+                if (index == 0)
+                    return new KeyValuePair<ulong, T>(0, v);
+                return new KeyValuePair<ulong, T>(period, v);
+            }).GetEnumerator() ?? throw new ArgumentNullException(nameof(values));
             result._isFirst = true;
             result.Descheduled = false;
             return result;

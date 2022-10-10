@@ -6,37 +6,37 @@ namespace StratifiedEventQueue
     /// <summary>
     /// A comparer that can be used for signal values as defined by the verilog-A standard.
     /// </summary>
-    public class SignalValue : IEqualityComparer<byte>
+    public class Logic : IEqualityComparer<byte>
     {
         /// <summary>
         /// Gets the comparer for signal values.
         /// </summary>
-        public static IEqualityComparer<byte> Comparer { get; } = new SignalValue();
-
-        /// <summary>
-        /// Represents an unknown value.
-        /// </summary>
-        public const byte X = 0;
+        public static IEqualityComparer<byte> Comparer { get; } = new Logic();
 
         /// <summary>
         /// Represents a low value.
         /// </summary>
-        public const byte L = 1;
+        public const byte L = 0;
 
         /// <summary>
         /// Represents a high value.
         /// </summary>
-        public const byte H = 2;
+        public const byte H = 1;
 
         /// <summary>
         /// Represents a high-impedant value.
         /// </summary>
-        public const byte Z = 3;
+        public const byte Z = 2;
 
         /// <summary>
-        /// Creates a new <see cref="SignalValue"/>.
+        /// Represents an unknown value.
         /// </summary>
-        private SignalValue()
+        public const byte X = 3;
+
+        /// <summary>
+        /// Creates a new <see cref="Logic"/>.
+        /// </summary>
+        private Logic()
         {
         }
 

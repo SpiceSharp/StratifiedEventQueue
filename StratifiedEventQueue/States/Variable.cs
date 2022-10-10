@@ -43,16 +43,7 @@ namespace StratifiedEventQueue.States
         public Variable(string name, T initialValue = default, IEqualityComparer<T> comparer = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            if (comparer == null)
-            {
-                if (typeof(T) == typeof(byte))
-                    // Assume it is dealing with signal values
-                    Comparer = (IEqualityComparer<T>)SignalValue.Comparer;
-                else
-                    Comparer = EqualityComparer<T>.Default;
-            }
-            else
-                Comparer = comparer;
+            Comparer = comparer ?? EqualityComparer<T>.Default;
             OldValue = initialValue;
             Value = initialValue;
         }

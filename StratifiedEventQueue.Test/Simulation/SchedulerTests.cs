@@ -76,23 +76,23 @@ namespace StratifiedEventQueue.Test.Simulation
             // This test demonstrates descheduling, which is necessary when simulating
             // inertial delays
             // We emulate an inverter with a delay in rise and fall time
-            var input = new Variable<byte>("IN");
-            var output = new Variable<byte>("OUT");
+            var input = new LogicVariable("IN");
+            var output = new LogicVariable("OUT");
             var scheduler = new Scheduler();
 
             // We first create a waveform to test our inertial delay
-            CreateWaveform(scheduler, input, new ulong[] { 0, 1, 2, 4, 6, 7, 8, 11 }, SignalValue.FromStringBinary("01010101"));
+            CreateWaveform(scheduler, input, new ulong[] { 0, 1, 2, 4, 6, 7, 8, 11 }, Logic.FromStringBinary("01010101"));
 
             // Now let us create an inertial delay inverter
             Event? nextEvent = null;
             ulong nextEventTime = 0;
             void InertialDelayInverter(object? sender, VariableValueChangedEventArgs<byte> args)
             {
-                byte value = SignalValue.Not(args.Variable.Value);
+                byte value = Logic.Not(args.Variable.Value);
                 ulong delay = args.Variable.Value switch
                 {
-                    SignalValue.L => 2,
-                    SignalValue.H => 1,
+                    Logic.L => 2,
+                    Logic.H => 1,
                     _ => 0
                 };
 
@@ -113,7 +113,7 @@ namespace StratifiedEventQueue.Test.Simulation
             // We will then test for a specific waveform
             int index = 0;
             var expectedTime = new ulong[] { 2, 4, 5, 10, 12 };
-            var expectedValues = SignalValue.FromStringBinary("01010");
+            var expectedValues = Logic.FromStringBinary("01010");
             void CheckWaveform(object? sender, VariableValueChangedEventArgs<byte> args)
             {
                 Assert.Equal(expectedTime[index], args.Scheduler.CurrentTime);

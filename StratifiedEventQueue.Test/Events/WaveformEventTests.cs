@@ -49,7 +49,33 @@ namespace StratifiedEventQueue.Test.Events
 
             scheduler.Process();
 
-            Assert.Equal(index, deltas.Length);
+            Assert.Equal(deltas.Length, index);
+        }
+
+        [Fact]
+        public void When_SimulateWaveform2_Expect_Reference()
+        {
+            var values = new int[] { 4, 3, 2, 1 };
+            var v = new Variable<int>("A");
+
+            var scheduler = new Scheduler();
+            scheduler.ScheduleInactive(0, WaveformEvent<int>.Create(v, 10, values));
+
+            ulong time = 0;
+            int index = 0;
+            void Check(object? sender, VariableValueChangedEventArgs<int> args)
+            {
+                if (values == null)
+                    throw new ArgumentNullException(nameof(values));
+                Assert.Equal(time, args.Scheduler.CurrentTime);
+                Assert.Equal(values[index], args.Variable.Value);
+                index++;
+                time += 10;
+            }
+            v.Changed += Check;
+
+            scheduler.Process();
+            Assert.Equal(values.Length, index);
         }
     }
 }
