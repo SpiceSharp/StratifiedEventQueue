@@ -1,4 +1,5 @@
 ﻿using StratifiedEventQueue.Events;
+using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States;
 
 namespace StratifiedEventQueue.Test.Events
@@ -18,6 +19,7 @@ namespace StratifiedEventQueue.Test.Events
         [Fact]
         public void When_ExecuteEvent_Expect_Reference()
         {
+            var scheduler = new Scheduler();
             var va = new Variable<int>("A");
             var vb = new Variable<int>("B");
             var fa = new Func<int>(() => 4);
@@ -26,7 +28,7 @@ namespace StratifiedEventQueue.Test.Events
             var event1 = DeferredAssignmentEvent<int>.Create(va, fa);
             Assert.Equal(fa, event1.Func);
             Assert.Equal(va, event1.Variable);
-            event1.Release();
+            event1.Execute(scheduler);
 
             var event2 = DeferredAssignmentEvent<int>.Create(vb, fb);
             Assert.Equal(fb, event2.Func);

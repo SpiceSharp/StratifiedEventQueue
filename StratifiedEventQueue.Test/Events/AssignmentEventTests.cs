@@ -1,4 +1,5 @@
 ﻿using StratifiedEventQueue.Events;
+using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States;
 
 namespace StratifiedEventQueue.Test.Events
@@ -17,12 +18,14 @@ namespace StratifiedEventQueue.Test.Events
         [Fact]
         public void When_ExecuteEvent_Expect_PoolPresence()
         {
+            var scheduler = new Scheduler();
+
             var va = new Variable<int>("A");
             var vb = new Variable<int>("B");
             var event1 = AssignmentEvent<int>.Create(va, 3);
             Assert.Equal(3, event1.Value);
             Assert.Equal(va, event1.Variable);
-            event1.Release();
+            event1.Execute(scheduler);
 
             var event2 = AssignmentEvent<int>.Create(vb, 4);
             Assert.Equal(4, event2.Value);

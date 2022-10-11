@@ -52,14 +52,8 @@ namespace StratifiedEventQueue.Events
                 Variable.Update(scheduler, Tik);
 
             // Schedule ourself in the future
-            scheduler.ScheduleInactive(Period, this);
-        }
-
-        /// <inheritdoc />
-        public override void Release()
-        {
             _isTok = !_isTok;
-            Descheduled = false;
+            scheduler.ScheduleInactive(Period, this);
         }
     }
 }

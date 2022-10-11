@@ -67,7 +67,7 @@ namespace StratifiedEventQueue
         {
             if (_root == null)
             {
-                _root = new Node(key, new EventQueue());
+                _root = new Node(key, EventQueue.Create());
                 Count = 1;
                 return _root.Value;
             }
@@ -79,7 +79,7 @@ namespace StratifiedEventQueue
             if (_root.Key == key)
                 return _root.Value;
 
-            var node = new Node(key, new EventQueue());
+            var node = new Node(key, EventQueue.Create());
             if (_root.Key < key)
             {
                 node.Left = _root;

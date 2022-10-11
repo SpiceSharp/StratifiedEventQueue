@@ -84,7 +84,7 @@ namespace StratifiedEventQueue.Test.Simulation
             CreateWaveform(scheduler, input, new ulong[] { 0, 1, 2, 4, 6, 7, 8, 11 }, Logic.FromStringBinary("01010101"));
 
             // Now let us create an inertial delay inverter
-            Event? nextEvent = null;
+            EventNode? nextEvent = null;
             ulong nextEventTime = 0;
             void InertialDelayInverter(object? sender, VariableValueChangedEventArgs<byte> args)
             {
@@ -102,11 +102,11 @@ namespace StratifiedEventQueue.Test.Simulation
                     // This event happens before/at the same time as the next
                     // This means that this event will happen instead of the
                     // already scheduled event
-                    nextEvent.Descheduled = true;
+                    nextEvent.Deschedule();
                 }
-                nextEvent = AssignmentEvent<byte>.Create(output, value);
+                var @event = AssignmentEvent<byte>.Create(output, value);
                 nextEventTime = nextTime;
-                scheduler.ScheduleInactive(delay, nextEvent);
+                nextEvent = scheduler.ScheduleInactive(delay, @event);
             }
             input.Changed += InertialDelayInverter;
 

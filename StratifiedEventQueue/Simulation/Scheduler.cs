@@ -1,5 +1,6 @@
 ﻿using StratifiedEventQueue.Events;
 using System;
+using System.Collections.Generic;
 
 namespace StratifiedEventQueue.Simulation
 {
@@ -8,7 +9,7 @@ namespace StratifiedEventQueue.Simulation
     /// </summary>
     public class Scheduler : IScheduler
     {
-        private readonly EventRegion _active = new EventRegion(), _monitor = new EventRegion();
+        private readonly Queue<EventNode> _active = new Queue<EventNode>(), _monitor = new Queue<EventNode>();
         private readonly SplayTree _tree = new SplayTree();
 
         /// <inheritdoc />
@@ -28,33 +29,50 @@ namespace StratifiedEventQueue.Simulation
         }
 
         /// <inheritdoc />
-        public void Schedule(Event @event) => _active.Add(@event ?? throw new ArgumentNullException(nameof(@event)));
+        public EventNode Schedule(Event @event)
+        {
+            if (@event == null)
+                throw new ArgumentNullException(nameof(@event));
+            var node = EventNode.Create(@event);
+            _active.Enqueue(node);
+            return node;
+        }
 
         /// <inheritdoc />
-        public void ScheduleInactive(ulong delay, Event @event)
+        public EventNode ScheduleInactive(ulong delay, Event @event)
         {
             if (@event == null)
                 throw new ArgumentNullException(nameof(@event));
             var eventQueue = _tree.GetOrAdd(CurrentTime + delay);
-            eventQueue.Inactive.Add(@event);
+            var node = EventNode.Create(@event);
+            eventQueue.Inactive.Enqueue(node);
+            return node;
         }
 
         /// <inheritdoc />
-        public void ScheduleNonBlocking(ulong delay, Event @event)
+        public EventNode ScheduleNonBlocking(ulong delay, Event @event)
         {
             if (@event == null)
                 throw new ArgumentNullException(nameof(@event));
             var eventQueue = _tree.GetOrAdd(CurrentTime + delay);
-            eventQueue.NonBlocking.Add(@event);
+            var node = EventNode.Create(@event);
+            eventQueue.NonBlocking.Enqueue(node);
+            return node;
         }
 
         /// <inheritdoc />
-        public void ScheduleMonitor(Event @event) => _monitor.Add(@event);
+        public EventNode ScheduleMonitor(Event @event)
+        {
+            if (@event == null)
+                throw new ArgumentNullException(nameof(@event));
+            var node = EventNode.Create(@event);
+            _monitor.Enqueue(node);
+            return node;
+        }
 
         /// <inheritdoc />
         public void Process()
         {
-            Event @event;
             while (_tree.Count > 0)
             {
                 var node = _tree.PeekFirst();
@@ -70,28 +88,30 @@ namespace StratifiedEventQueue.Simulation
                     {
                         if (events.Inactive.Count > 0)
                         {
-                            while ((@event = events.Inactive.Extract()) != null)
-                                _active.Add(@event);
+                            while (events.Inactive.Count > 0)
+                                _active.Enqueue(events.Inactive.Dequeue());
                         }
                         else if (events.NonBlocking.Count > 0)
                         {
-                            while ((@event = events.NonBlocking.Extract()) != null)
-                                _active.Add(@event);
+                            while (events.NonBlocking.Count > 0)
+                                _active.Enqueue(events.NonBlocking.Dequeue());
                         }
                         else if (_monitor.Count > 0)
                         {
-                            while ((@event = _monitor.Extract()) != null)
-                                _active.Add(@event);
+                            while (_monitor.Count > 0)
+                                _active.Enqueue(_monitor.Dequeue());
                         }
                         else
                             break;
                     }
 
-                    // Get the next active event and execute it
-                    while ((@event = _active.Extract()) != null)
+                    // Run the active event queue
+                    while (_active.Count > 0)
                     {
-                        @event.Execute(this);
-                        @event.Release();
+                        var a = _active.Dequeue();
+                        if (a.IsScheduled)
+                            a.Event.Execute(this);
+                        a.Release();
                     }
                 }
 

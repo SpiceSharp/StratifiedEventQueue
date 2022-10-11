@@ -12,7 +12,7 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the variable.</typeparam>
     public class DeferredAssignmentEvent<T> : Event
     {
-        private static readonly Queue<DeferredAssignmentEvent<T>> _eventPool = new Queue<DeferredAssignmentEvent<T>>();
+        private static readonly Queue<DeferredAssignmentEvent<T>> _pool = new Queue<DeferredAssignmentEvent<T>>();
 
         /// <summary>
         /// Gets the variable that needs to be assigned.
@@ -36,13 +36,9 @@ namespace StratifiedEventQueue.Events
         {
             T value = Func();
             Variable.Update(scheduler, value);
-        }
 
-        /// <inheritdoc />
-        public override void Release()
-        {
-            // Allow object reuse
-            _eventPool.Enqueue(this);
+            // It is now ok to reuse this event
+            _pool.Enqueue(this);
         }
 
         /// <summary>
@@ -50,19 +46,14 @@ namespace StratifiedEventQueue.Events
         /// </summary>
         /// <param name="variable">The variable to assign to.</param>
         /// <param name="function">The function</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <returns>The event.</returns>
+        /// <exception cref="ArgumentNullException">Thrown if any parameter is <c>null</c>.</exception>
         public static DeferredAssignmentEvent<T> Create(Variable<T> variable, Func<T> function)
         {
-            DeferredAssignmentEvent<T> @event;
-            if (_eventPool.Count > 0)
-                @event = _eventPool.Dequeue();
-            else
-                @event = new DeferredAssignmentEvent<T>();
-            @event.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
-            @event.Func = function ?? throw new ArgumentNullException(nameof(function));
-            @event.Descheduled = false;
-            return @event;
+            DeferredAssignmentEvent<T> result = _pool.Count > 0 ? _pool.Dequeue() : new DeferredAssignmentEvent<T>();
+            result.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
+            result.Func = function ?? throw new ArgumentNullException(nameof(function));
+            return result;
         }
     }
 }

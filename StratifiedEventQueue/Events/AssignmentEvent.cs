@@ -11,7 +11,12 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the variable.</typeparam>
     public class AssignmentEvent<T> : Event
     {
-        private static readonly Queue<AssignmentEvent<T>> _eventPool = new Queue<AssignmentEvent<T>>(20);
+        private static readonly Queue<AssignmentEvent<T>> _pool = new Queue<AssignmentEvent<T>>(InitialPoolSize);
+
+        /// <summary>
+        /// The initial pool size.
+        /// </summary>
+        public const int InitialPoolSize = 20;
 
         /// <summary>
         /// Gets the variable that needs to be assigned.
@@ -34,12 +39,9 @@ namespace StratifiedEventQueue.Events
         public override void Execute(IScheduler scheduler)
         {
             Variable.Update(scheduler, Value);
-        }
 
-        /// <inheritdoc />
-        public override void Release()
-        {
-            _eventPool.Enqueue(this);
+            // It is now ok to reuse this event again
+            _pool.Enqueue(this);
         }
 
         /// <summary>
@@ -50,14 +52,9 @@ namespace StratifiedEventQueue.Events
         /// <returns></returns>
         public static AssignmentEvent<T> Create(Variable<T> variable, T value)
         {
-            AssignmentEvent<T> @event;
-            if (_eventPool.Count > 0)
-                @event = _eventPool.Dequeue();
-            else
-                @event = new AssignmentEvent<T>();
+            AssignmentEvent<T> @event = _pool.Count > 0 ? _pool.Dequeue() : new AssignmentEvent<T>();
             @event.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             @event.Value = value;
-            @event.Descheduled = false;
             return @event;
         }
     }
