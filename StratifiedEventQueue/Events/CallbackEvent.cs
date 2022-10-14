@@ -9,12 +9,8 @@ namespace StratifiedEventQueue.Events
     /// </summary>
     public class CallbackEvent : Event
     {
-        private readonly static Queue<CallbackEvent> _pool = new Queue<CallbackEvent>(InitialPoolSize);
-
-        /// <summary>
-        /// The initial size of the pool
-        /// </summary>
-        public const int InitialPoolSize = 20;
+        private readonly static System.Collections.Generic.Queue<CallbackEvent> _pool
+            = new System.Collections.Generic.Queue<CallbackEvent>();
 
         /// <summary>
         /// Gets the action that will be executed for the event.

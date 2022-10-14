@@ -12,7 +12,8 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the variable.</typeparam>
     public class DeferredAssignmentEvent<T> : Event
     {
-        private static readonly Queue<DeferredAssignmentEvent<T>> _pool = new Queue<DeferredAssignmentEvent<T>>();
+        private static readonly System.Collections.Generic.Queue<DeferredAssignmentEvent<T>> _pool 
+            = new System.Collections.Generic.Queue<DeferredAssignmentEvent<T>>();
 
         /// <summary>
         /// Gets the variable that needs to be assigned.

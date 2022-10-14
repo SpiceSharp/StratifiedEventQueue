@@ -86,7 +86,7 @@ namespace StratifiedEventQueue.Test.Simulation
             // Now let us create an inertial delay inverter
             EventNode? nextEvent = null;
             ulong nextEventTime = 0;
-            void InertialDelayInverter(object? sender, VariableValueChangedEventArgs<byte> args)
+            void InertialDelayInverter(object? sender, ValueChangedEventArgs<byte> args)
             {
                 byte value = Logic.Not(args.Variable.Value);
                 ulong delay = args.Variable.Value switch
@@ -114,7 +114,7 @@ namespace StratifiedEventQueue.Test.Simulation
             int index = 0;
             var expectedTime = new ulong[] { 2, 4, 5, 10, 12 };
             var expectedValues = Logic.FromStringBinary("01010");
-            void CheckWaveform(object? sender, VariableValueChangedEventArgs<byte> args)
+            void CheckWaveform(object? sender, ValueChangedEventArgs<byte> args)
             {
                 Assert.Equal(expectedTime[index], args.Scheduler.CurrentTime);
                 Assert.Equal(expectedValues[index], args.Variable.Value);
@@ -157,7 +157,7 @@ namespace StratifiedEventQueue.Test.Simulation
 
             // Checking the output
             int index = 0;
-            void Check(object? sender, VariableValueChangedEventArgs<byte> args)
+            void Check(object? sender, ValueChangedEventArgs<byte> args)
             {
                 Assert.Equal((ulong)(5 + index * 10), args.Scheduler.CurrentTime);
                 if ((index % 2) == 0)

@@ -9,7 +9,7 @@ namespace StratifiedEventQueue.Simulation
     /// </summary>
     public class Scheduler : IScheduler
     {
-        private readonly Queue<EventNode> _active = new Queue<EventNode>(), _monitor = new Queue<EventNode>();
+        private Queue<EventNode> _active = new Queue<EventNode>(), _monitor = new Queue<EventNode>();
         private readonly SplayTree _tree = new SplayTree();
 
         /// <inheritdoc />
@@ -84,29 +84,20 @@ namespace StratifiedEventQueue.Simulation
                 // Stratified event queue
                 while (true)
                 {
-                    if (_active.Count == 0)
+                    if (_active.IsEmpty)
                     {
-                        if (events.Inactive.Count > 0)
-                        {
-                            while (events.Inactive.Count > 0)
-                                _active.Enqueue(events.Inactive.Dequeue());
-                        }
-                        else if (events.NonBlocking.Count > 0)
-                        {
-                            while (events.NonBlocking.Count > 0)
-                                _active.Enqueue(events.NonBlocking.Dequeue());
-                        }
-                        else if (_monitor.Count > 0)
-                        {
-                            while (_monitor.Count > 0)
-                                _active.Enqueue(_monitor.Dequeue());
-                        }
+                        if (!events.Inactive.IsEmpty)
+                            events.SwapInactive(ref _active);
+                        else if (!events.NonBlocking.IsEmpty)
+                            events.SwapNonBlocking(ref _active);
+                        else if (!_monitor.IsEmpty)
+                            (_active, _monitor) = (_monitor, _active);
                         else
                             break;
                     }
 
                     // Run the active event queue
-                    while (_active.Count > 0)
+                    while (!_active.IsEmpty)
                     {
                         var a = _active.Dequeue();
                         if (a.IsScheduled)

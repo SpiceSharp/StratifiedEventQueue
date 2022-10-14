@@ -18,7 +18,7 @@ namespace StratifiedEventQueue.States
         /// <summary>
         /// Occurs when the value of the variable changed.
         /// </summary>
-        public event EventHandler<VariableValueChangedEventArgs<T>> Changed;
+        public event EventHandler<ValueChangedEventArgs<T>> Changed;
 
         /// <summary>
         /// Gets the name of the variable.
@@ -45,6 +45,7 @@ namespace StratifiedEventQueue.States
         /// </summary>
         /// <param name="name">The name of the variable.</param>
         /// <param name="initialValue">The initial value.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/> is <c>null</c>.</exception>
         public Variable(string name, T initialValue = default, IEqualityComparer<T> comparer = null)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -67,14 +68,14 @@ namespace StratifiedEventQueue.States
             ChangeTime = scheduler.CurrentTime;
             OldValue = Value;
             Value = value;
-            OnChanged(VariableValueChangedEventArgs<T>.Create(scheduler, this));
+            OnChanged(ValueChangedEventArgs<T>.Create(scheduler, this));
         }
 
         /// <summary>
         /// Called when the value of the variable changes.
         /// </summary>
         /// <param name="args">The argument.</param>
-        protected virtual void OnChanged(VariableValueChangedEventArgs<T> args)
+        protected virtual void OnChanged(ValueChangedEventArgs<T> args)
         {
             Changed?.Invoke(this, args);
         }

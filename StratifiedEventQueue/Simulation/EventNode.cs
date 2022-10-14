@@ -8,7 +8,7 @@ namespace StratifiedEventQueue.Simulation
     /// </summary>
     public class EventNode
     {
-        private static readonly Queue<EventNode> _pool = new Queue<EventNode>();
+        private static readonly System.Collections.Generic.Queue<EventNode> _pool = new System.Collections.Generic.Queue<EventNode>();
 
         /// <summary>
         /// Gets the event that needs to be executed.

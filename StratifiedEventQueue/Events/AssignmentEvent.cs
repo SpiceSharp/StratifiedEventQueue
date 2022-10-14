@@ -11,12 +11,8 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the variable.</typeparam>
     public class AssignmentEvent<T> : Event
     {
-        private static readonly Queue<AssignmentEvent<T>> _pool = new Queue<AssignmentEvent<T>>(InitialPoolSize);
-
-        /// <summary>
-        /// The initial pool size.
-        /// </summary>
-        public const int InitialPoolSize = 20;
+        private static readonly System.Collections.Generic.Queue<AssignmentEvent<T>> _pool
+            = new System.Collections.Generic.Queue<AssignmentEvent<T>>();
 
         /// <summary>
         /// Gets the variable that needs to be assigned.

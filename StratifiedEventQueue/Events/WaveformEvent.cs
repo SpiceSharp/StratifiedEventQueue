@@ -12,7 +12,8 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the waveform.</typeparam>
     public class WaveformEvent<T> : Event
     {
-        private static readonly Queue<WaveformEvent<T>> _pool = new Queue<WaveformEvent<T>>(InitialPoolSize);
+        private static readonly System.Collections.Generic.Queue<WaveformEvent<T>> _pool 
+            = new System.Collections.Generic.Queue<WaveformEvent<T>>(InitialPoolSize);
         private IEnumerator<KeyValuePair<ulong, T>> _enumerator;
         private bool _isFirst;
 
@@ -54,26 +55,6 @@ namespace StratifiedEventQueue.Events
                 // It is now ok to reuse this event
                 _pool.Enqueue(this);
             }
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="WaveformEvent{T}"/>, but this can only be used by other waveform events for
-        /// creating the next assignment.
-        /// </summary>
-        /// <param name="variable">The variable.</param>
-        /// <param name="enumerator">The enumerator.</param>
-        /// <returns>The waveform event.</returns>
-        private static WaveformEvent<T> Create(Variable<T> variable, IEnumerator<KeyValuePair<ulong, T>> enumerator)
-        {
-            WaveformEvent<T> result;
-            if (_pool.Count > 0)
-                result = _pool.Dequeue();
-            else
-                result = new WaveformEvent<T>();
-            result.Variable = variable;
-            result._enumerator = enumerator;
-            result._isFirst = true;
-            return result;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
 namespace StratifiedEventQueue.Simulation
 {
@@ -7,17 +7,23 @@ namespace StratifiedEventQueue.Simulation
     /// </summary>
     public class EventQueue
     {
-        private static readonly Queue<EventQueue> _pool = new Queue<EventQueue>();
+        private static readonly System.Collections.Generic.Queue<EventQueue> _pool
+            = new System.Collections.Generic.Queue<EventQueue>(InitialPoolSize);
+
+        /// <summary>
+        /// The initial pool size.
+        /// </summary>
+        public const int InitialPoolSize = 20;
 
         /// <summary>
         /// All inactive events that will be activated once all active events have finished.
         /// </summary>
-        public Queue<EventNode> Inactive { get; }
+        public Queue<EventNode> Inactive { get; private set; }
 
         /// <summary>
         /// All non-blocking events that will be activated once all active and inactive events have finished.
         /// </summary>
-        public Queue<EventNode> NonBlocking { get; }
+        public Queue<EventNode> NonBlocking { get; private set; }
 
         /// <summary>
         /// Creates a new <see cref="EventQueue"/>.
@@ -29,12 +35,35 @@ namespace StratifiedEventQueue.Simulation
         }
 
         /// <summary>
+        /// Swaps a queue with the inactive queue.
+        /// </summary>
+        /// <param name="queue">The queue to swap.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="queue"/> is <c>null</c>.</exception>
+        public void SwapInactive(ref Queue<EventNode> queue)
+        {
+            if (queue == null)
+                throw new ArgumentNullException(nameof(queue));
+            (queue, Inactive) = (Inactive, queue);
+        }
+
+        /// <summary>
+        /// Swaps a queue with the nonblocking queue.
+        /// </summary>
+        /// <param name="queue">The queue to swap.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="queue"/> is <c>null</c>.</exception>
+        public void SwapNonBlocking(ref Queue<EventNode> queue)
+        {
+            if (queue == null)
+                throw new ArgumentNullException(nameof(queue));
+            (queue, NonBlocking) = (NonBlocking, queue);
+        }
+
+        /// <summary>
         /// Releases the event queue for object reuse.
         /// </summary>
         public void Release()
         {
-            Inactive.Clear();
-            NonBlocking.Clear();
+            // Due to the way the scheduler works, we don't need to bother with clearing the queues
             _pool.Enqueue(this);
         }
 

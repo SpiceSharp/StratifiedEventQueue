@@ -36,7 +36,7 @@ namespace StratifiedEventQueue.Test.Events
 
             ulong time = 0;
             int index = 0;
-            void Check(object? sender, VariableValueChangedEventArgs<int> args)
+            void Check(object? sender, ValueChangedEventArgs<int> args)
             {
                 if (deltas == null || values == null)
                     throw new ArgumentNullException(nameof(deltas));
@@ -63,7 +63,7 @@ namespace StratifiedEventQueue.Test.Events
 
             ulong time = 0;
             int index = 0;
-            void Check(object? sender, VariableValueChangedEventArgs<int> args)
+            void Check(object? sender, ValueChangedEventArgs<int> args)
             {
                 if (values == null)
                     throw new ArgumentNullException(nameof(values));
