@@ -58,6 +58,13 @@ namespace StratifiedEventQueue.Test
             Assert.Equal(expected, StrengthRange.Wired(a, b));
         }
 
+        [Theory]
+        [MemberData(nameof(StrengthRangeLogic))]
+        public void When_StrengthRangeLogic_Expect_Reference(StrengthRange a, Logic expected)
+        {
+            Assert.Equal(expected, a.Logic);
+        }
+
         public static IEnumerable<object[]> Tests
         {
             get
@@ -164,6 +171,17 @@ namespace StratifiedEventQueue.Test
                     new StrengthRange(Strength.Pu1),
                     new StrengthRange(Strength.St0, Strength.Pu1)
                 };
+            }
+        }
+
+        public static IEnumerable<object[]> StrengthRangeLogic
+        {
+            get
+            {
+                yield return new object[] { new StrengthRange(Strength.We0, Strength.We0), Logic.L };
+                yield return new object[] { new StrengthRange(Strength.Sm1, Strength.St1), Logic.H };
+                yield return new object[] { new StrengthRange(Strength.We0, Strength.We1), Logic.X };
+                yield return new object[] { new StrengthRange(Strength.HiZ0, Strength.HiZ1), Logic.Z };
             }
         }
     }

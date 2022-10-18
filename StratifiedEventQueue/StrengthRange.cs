@@ -20,6 +20,30 @@ namespace StratifiedEventQueue
         public Strength High { get; }
 
         /// <summary>
+        /// Gets the equivalent logic value, based on the strength levels.
+        /// </summary>
+        public Logic Logic
+        {
+            get
+            {
+                // Both strengths are in the value 1 range
+                if (Low > Strength.HiZ1)
+                    return Logic.H;
+
+                // Both strengths are in the value 0 range
+                if (High < Strength.HiZ0)
+                    return Logic.L;
+
+                // Both values are in the high-Z range
+                if (Low >= Strength.HiZ0 && High <= Strength.HiZ1)
+                    return Logic.Z;
+
+                // We don't know...
+                return Logic.X;
+            }
+        }
+
+        /// <summary>
         /// Creates a new <see cref="StrengthRange"/>.
         /// </summary>
         /// <remarks>Allow ambiguous strengths.</remarks>
