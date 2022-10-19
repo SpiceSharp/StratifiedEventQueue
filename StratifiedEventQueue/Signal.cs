@@ -3,7 +3,7 @@
     /// <summary>
     /// An enumeration of Logic.Logic values.
     /// </summary>
-    public enum Logic : byte
+    public enum Signal : byte
     {
         /// <summary>
         /// Represents an unknown Logic.Logic value.

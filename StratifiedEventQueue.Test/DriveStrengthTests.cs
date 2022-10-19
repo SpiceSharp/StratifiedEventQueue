@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.ObjectiveC;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StratifiedEventQueue.Test
+﻿namespace StratifiedEventQueue.Test
 {
     public class DriveStrengthTests
     {
         [Theory]
         [MemberData(nameof(Tests))]
-        public void When_DriveStrengthRange_Expect_Reference(StrengthRange range, string result)
+        public void When_DriveStrengthRange_Expect_Reference(DriveStrengthRange range, string result)
         {
             Assert.Equal(result, range.ToString());
         }
@@ -20,47 +13,47 @@ namespace StratifiedEventQueue.Test
         [MemberData(nameof(WiredAndTests))]
         public void When_WiredAnd_Expect_Reference(Strength a, Strength b, Strength expected)
         {
-            Assert.Equal(expected, StrengthRange.WiredAnd(a, b));
+            Assert.Equal(expected, DriveStrengthRange.WiredAnd(a, b));
         }
 
         [Theory]
         [MemberData(nameof(WiredOrTests))]
         public void When_WiredOr_Expect_Reference(Strength a, Strength b, Strength expected)
         {
-            Assert.Equal(expected, StrengthRange.WiredOr(a, b));
+            Assert.Equal(expected, DriveStrengthRange.WiredOr(a, b));
         }
 
         [Theory]
         [MemberData(nameof(ReduceTests))]
         public void When_Reduce_Expect_Reference(Strength a, Strength expected)
         {
-            Assert.Equal(expected, StrengthRange.Reduce(a));
+            Assert.Equal(expected, DriveStrengthRange.Reduce(a));
         }
 
         [Theory]
         [MemberData(nameof(AmbiguousWiredAndTests))]
-        public void When_AmbiguousWiredAndTests_Expect_Reference(StrengthRange a, StrengthRange b, StrengthRange expected)
+        public void When_AmbiguousWiredAndTests_Expect_Reference(DriveStrengthRange a, DriveStrengthRange b, DriveStrengthRange expected)
         {
-            Assert.Equal(expected, StrengthRange.WiredAnd(a, b));
+            Assert.Equal(expected, DriveStrengthRange.WiredAnd(a, b));
         }
 
         [Theory]
         [MemberData(nameof(AmbiguousWiredOrTests))]
-        public void When_AmbiguousWiredOrTests_Expect_Reference(StrengthRange a, StrengthRange b, StrengthRange expected)
+        public void When_AmbiguousWiredOrTests_Expect_Reference(DriveStrengthRange a, DriveStrengthRange b, DriveStrengthRange expected)
         {
-            Assert.Equal(expected, StrengthRange.WiredOr(a, b));
+            Assert.Equal(expected, DriveStrengthRange.WiredOr(a, b));
         }
 
         [Theory]
         [MemberData(nameof(AmbiguousWiredTests))]
-        public void When_AmbigousWiredTests_Expect_Reference(StrengthRange a, StrengthRange b, StrengthRange expected)
+        public void When_AmbigousWiredTests_Expect_Reference(DriveStrengthRange a, DriveStrengthRange b, DriveStrengthRange expected)
         {
-            Assert.Equal(expected, StrengthRange.Wired(a, b));
+            Assert.Equal(expected, DriveStrengthRange.Wired(a, b));
         }
 
         [Theory]
         [MemberData(nameof(StrengthRangeLogic))]
-        public void When_StrengthRangeLogic_Expect_Reference(StrengthRange a, Logic expected)
+        public void When_StrengthRangeLogic_Expect_Reference(DriveStrengthRange a, Signal expected)
         {
             Assert.Equal(expected, a.Logic);
         }
@@ -69,16 +62,16 @@ namespace StratifiedEventQueue.Test
         {
             get
             {
-                yield return new object[] { new StrengthRange(Strength.We0, Strength.We1), "WeX" };
-                yield return new object[] { new StrengthRange(Strength.None, Strength.St1), "StH" };
-                yield return new object[] { new StrengthRange(Strength.None, Strength.St0), "StL" };
-                yield return new object[] { new StrengthRange(Strength.We0, Strength.Pu1), "35X" };
-                yield return new object[] { new StrengthRange(Strength.Pu1, Strength.St1), "651" };
-                yield return new object[] { new StrengthRange(Strength.Pu0, Strength.We0), "530" };
-                yield return new object[] { new StrengthRange(Strength.Pu0, Strength.St1), "56X" };
-                yield return new object[] { new StrengthRange(Strength.HiZ0, Strength.St1), "StH" };
-                yield return new object[] { new StrengthRange(Strength.We0, Strength.We0), "We0" };
-                yield return new object[] { new StrengthRange(Strength.We0, Strength.St1), "36X" };
+                yield return new object[] { new DriveStrengthRange(Strength.We0, Strength.We1), "WeX" };
+                yield return new object[] { new DriveStrengthRange(Strength.None, Strength.St1), "StH" };
+                yield return new object[] { new DriveStrengthRange(Strength.None, Strength.St0), "StL" };
+                yield return new object[] { new DriveStrengthRange(Strength.We0, Strength.Pu1), "35X" };
+                yield return new object[] { new DriveStrengthRange(Strength.Pu1, Strength.St1), "651" };
+                yield return new object[] { new DriveStrengthRange(Strength.Pu0, Strength.We0), "530" };
+                yield return new object[] { new DriveStrengthRange(Strength.Pu0, Strength.St1), "56X" };
+                yield return new object[] { new DriveStrengthRange(Strength.HiZ0, Strength.St1), "StH" };
+                yield return new object[] { new DriveStrengthRange(Strength.We0, Strength.We0), "We0" };
+                yield return new object[] { new DriveStrengthRange(Strength.We0, Strength.St1), "36X" };
             }
         }
 
@@ -88,9 +81,9 @@ namespace StratifiedEventQueue.Test
             {
                 yield return new object[]
                 {
-                    new StrengthRange(Strength.St0, Strength.Pu0),
-                    new StrengthRange(Strength.Pu1),
-                    new StrengthRange(Strength.St0, Strength.Pu1)
+                    new DriveStrengthRange(Strength.St0, Strength.Pu0),
+                    new DriveStrengthRange(Strength.Pu1),
+                    new DriveStrengthRange(Strength.St0, Strength.Pu1)
                 };
             }
         }
@@ -154,9 +147,9 @@ namespace StratifiedEventQueue.Test
             get
             {
                 yield return new object[] {
-                    new StrengthRange(Strength.St0, Strength.Pu0),
-                    new StrengthRange(Strength.Pu1),
-                    new StrengthRange(Strength.St0, Strength.Pu0)
+                    new DriveStrengthRange(Strength.St0, Strength.Pu0),
+                    new DriveStrengthRange(Strength.Pu1),
+                    new DriveStrengthRange(Strength.St0, Strength.Pu0)
                 };
             }
         }
@@ -167,9 +160,9 @@ namespace StratifiedEventQueue.Test
             {
                 yield return new object[]
                 {
-                    new StrengthRange(Strength.St0, Strength.Pu0),
-                    new StrengthRange(Strength.Pu1),
-                    new StrengthRange(Strength.St0, Strength.Pu1)
+                    new DriveStrengthRange(Strength.St0, Strength.Pu0),
+                    new DriveStrengthRange(Strength.Pu1),
+                    new DriveStrengthRange(Strength.St0, Strength.Pu1)
                 };
             }
         }
@@ -178,10 +171,10 @@ namespace StratifiedEventQueue.Test
         {
             get
             {
-                yield return new object[] { new StrengthRange(Strength.We0, Strength.We0), Logic.L };
-                yield return new object[] { new StrengthRange(Strength.Sm1, Strength.St1), Logic.H };
-                yield return new object[] { new StrengthRange(Strength.We0, Strength.We1), Logic.X };
-                yield return new object[] { new StrengthRange(Strength.HiZ0, Strength.HiZ1), Logic.Z };
+                yield return new object[] { new DriveStrengthRange(Strength.We0, Strength.We0), Signal.L };
+                yield return new object[] { new DriveStrengthRange(Strength.Sm1, Strength.St1), Signal.H };
+                yield return new object[] { new DriveStrengthRange(Strength.We0, Strength.We1), Signal.X };
+                yield return new object[] { new DriveStrengthRange(Strength.HiZ0, Strength.HiZ1), Signal.Z };
             }
         }
     }

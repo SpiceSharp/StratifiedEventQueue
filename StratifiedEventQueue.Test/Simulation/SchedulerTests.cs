@@ -76,8 +76,8 @@ namespace StratifiedEventQueue.Test.Simulation
             // This test demonstrates descheduling, which is necessary when simulating
             // inertial delays
             // We emulate an inverter with a delay in rise and fall time
-            var input = new Variable<Logic>("IN");
-            var output = new Variable<Logic>("OUT");
+            var input = new Variable<Signal>("IN");
+            var output = new Variable<Signal>("OUT");
             var scheduler = new Scheduler();
 
             // We first create a waveform to test our inertial delay
@@ -86,13 +86,13 @@ namespace StratifiedEventQueue.Test.Simulation
             // Now let us create an inertial delay inverter
             EventNode? nextEvent = null;
             ulong nextEventTime = 0;
-            void InertialDelayInverter(object? sender, ValueChangedEventArgs<Logic> args)
+            void InertialDelayInverter(object? sender, ValueChangedEventArgs<Signal> args)
             {
                 var value = LogicHelper.Not(args.Variable.Value);
                 ulong delay = args.Variable.Value switch
                 {
-                    Logic.L => 2,
-                    Logic.H => 1,
+                    Signal.L => 2,
+                    Signal.H => 1,
                     _ => 0
                 };
 
@@ -104,7 +104,7 @@ namespace StratifiedEventQueue.Test.Simulation
                     // already scheduled event
                     nextEvent.Deschedule();
                 }
-                var @event = AssignmentEvent<Logic>.Create(output, value);
+                var @event = AssignmentEvent<Signal>.Create(output, value);
                 nextEventTime = nextTime;
                 nextEvent = scheduler.ScheduleInactive(delay, @event);
             }
@@ -114,7 +114,7 @@ namespace StratifiedEventQueue.Test.Simulation
             int index = 0;
             var expectedTime = new ulong[] { 2, 4, 5, 10, 12 };
             var expectedValues = "01010".ToLogic();
-            void CheckWaveform(object? sender, ValueChangedEventArgs<Logic> args)
+            void CheckWaveform(object? sender, ValueChangedEventArgs<Signal> args)
             {
                 Assert.Equal(expectedTime[index], args.Scheduler.CurrentTime);
                 Assert.Equal(expectedValues[index], args.Variable.Value);
@@ -132,38 +132,38 @@ namespace StratifiedEventQueue.Test.Simulation
         {
             // This example demonstrates an enabled T-flip-flop
             var scheduler = new Scheduler();
-            var clk = new Variable<Logic>("clk", Logic.L);
-            var output = new Variable<Logic>("out", Logic.L);
+            var clk = new Variable<Signal>("clk", Signal.L);
+            var output = new Variable<Signal>("out", Signal.L);
 
             // Starts the clock
-            scheduler.ScheduleInactive(5, AssignmentEvent<Logic>.Create(clk, Logic.H));
+            scheduler.ScheduleInactive(5, AssignmentEvent<Signal>.Create(clk, Signal.H));
 
             // Keeps the clock going
             clk.Changed += (sender, args) =>
             {
                 // Invert the clock
-                args.Scheduler.ScheduleInactive(5, AssignmentEvent<Logic>.Create(clk, LogicHelper.Not(clk.Value)));
+                args.Scheduler.ScheduleInactive(5, AssignmentEvent<Signal>.Create(clk, LogicHelper.Not(clk.Value)));
             };
 
             // The T-flip-flop definition, with only sensitivity to the clock
             clk.Changed += (sender, args) =>
             {
-                if (clk.OldValue == Logic.L && clk.Value == Logic.H)
+                if (clk.OldValue == Signal.L && clk.Value == Signal.H)
                 {
                     // Posedge reached, toggle the output
-                    args.Scheduler.ScheduleInactive(0, AssignmentEvent<Logic>.Create(output, LogicHelper.Not(output.Value)));
+                    args.Scheduler.ScheduleInactive(0, AssignmentEvent<Signal>.Create(output, LogicHelper.Not(output.Value)));
                 }
             };
 
             // Checking the output
             int index = 0;
-            void Check(object? sender, ValueChangedEventArgs<Logic> args)
+            void Check(object? sender, ValueChangedEventArgs<Signal> args)
             {
                 Assert.Equal((ulong)(5 + index * 10), args.Scheduler.CurrentTime);
                 if ((index % 2) == 0)
-                    Assert.Equal(Logic.H, output.Value);
+                    Assert.Equal(Signal.H, output.Value);
                 else
-                    Assert.Equal(Logic.L, output.Value);
+                    Assert.Equal(Signal.L, output.Value);
                 index++;
             }
             output.Changed += Check;
@@ -178,34 +178,34 @@ namespace StratifiedEventQueue.Test.Simulation
         {
             // This example emulates a flip-flop with asynchronous reset
             var scheduler = new Scheduler();
-            var d = new Variable<Logic>("d");
-            var clk = new Variable<Logic>("clk");
-            var rst = new Variable<Logic>("rst");
-            var q = new Variable<Logic>("q");
+            var d = new Variable<Signal>("d");
+            var clk = new Variable<Signal>("clk");
+            var rst = new Variable<Signal>("rst");
+            var q = new Variable<Signal>("q");
 
             // Define the data
-            scheduler.ScheduleInactive(0, WaveformEvent<Logic>.Create(d, 10, new Logic[] { Logic.L, Logic.H }));
+            scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(d, 10, new Signal[] { Signal.L, Signal.H }));
 
             // Define the clock
-            scheduler.ScheduleInactive(0, new TikTokEvent<Logic>(clk, 5, Logic.L, Logic.H));
+            scheduler.ScheduleInactive(0, new TikTokEvent<Signal>(clk, 5, Signal.L, Signal.H));
 
             // Define the reset
-            scheduler.ScheduleInactive(0, WaveformEvent<Logic>.Create(rst, 22, new Logic[] { Logic.L, Logic.H }));
+            scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(rst, 22, new Signal[] { Signal.L, Signal.H }));
 
             // Define the working of the flip-flop
             void Dflipflop(IScheduler scheduler)
             {
-                if (rst.Value == Logic.H)
-                    scheduler.Schedule(AssignmentEvent<Logic>.Create(q, Logic.L));
-                else if (clk.Value == Logic.H && clk.OldValue == Logic.L && clk.ChangeTime == scheduler.CurrentTime)
-                    scheduler.Schedule(AssignmentEvent<Logic>.Create(q, d.Value));
+                if (rst.Value == Signal.H)
+                    scheduler.Schedule(AssignmentEvent<Signal>.Create(q, Signal.L));
+                else if (clk.Value == Signal.H && clk.OldValue == Signal.L && clk.ChangeTime == scheduler.CurrentTime)
+                    scheduler.Schedule(AssignmentEvent<Signal>.Create(q, d.Value));
             }
             clk.Changed += (sender, args) => Dflipflop(args.Scheduler);
             rst.Changed += (sender, args) => Dflipflop(args.Scheduler);
 
             // Check the output
             var times = new ulong[] { 5, 15, 22  };
-            var values = new Logic[] { Logic.L, Logic.H, Logic.L };
+            var values = new Signal[] { Signal.L, Signal.H, Signal.L };
             int index = 0;
             q.Changed += (sender, args) =>
             {

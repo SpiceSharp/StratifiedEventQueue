@@ -13,13 +13,13 @@ namespace StratifiedEventQueue
         /// <param name="a">The first argument.</param>
         /// <param name="b">The second argument.</param>
         /// <returns>The result.</returns>
-        public static Logic And(Logic a, Logic b)
+        public static Signal And(Signal a, Signal b)
         {
-            if (a == Logic.L || b == Logic.L)
-                return Logic.L;
-            if (a == Logic.H && b == Logic.H)
-                return Logic.H;
-            return Logic.X;
+            if (a == Signal.L || b == Signal.L)
+                return Signal.L;
+            if (a == Signal.H && b == Signal.H)
+                return Signal.H;
+            return Signal.X;
         }
 
         /// <summary>
@@ -28,13 +28,13 @@ namespace StratifiedEventQueue
         /// <param name="a">The first argument.</param>
         /// <param name="b">The second argument.</param>
         /// <returns>The result.</returns>
-        public static Logic Nand(Logic a, Logic b)
+        public static Signal Nand(Signal a, Signal b)
         {
-            if (a == Logic.L || b == Logic.L)
-                return Logic.H;
-            if (a == Logic.H && b == Logic.H)
-                return Logic.L;
-            return Logic.X;
+            if (a == Signal.L || b == Signal.L)
+                return Signal.H;
+            if (a == Signal.H && b == Signal.H)
+                return Signal.L;
+            return Signal.X;
         }
 
         /// <summary>
@@ -43,13 +43,13 @@ namespace StratifiedEventQueue
         /// <param name="a">The first argument.</param>
         /// <param name="b">The second argument.</param>
         /// <returns>The result.</returns>
-        public static Logic Or(Logic a, Logic b)
+        public static Signal Or(Signal a, Signal b)
         {
-            if (a == Logic.H || b == Logic.H)
-                return Logic.H;
-            if (a == Logic.L && b == Logic.L)
-                return Logic.L;
-            return Logic.X;
+            if (a == Signal.H || b == Signal.H)
+                return Signal.H;
+            if (a == Signal.L && b == Signal.L)
+                return Signal.L;
+            return Signal.X;
         }
 
         /// <summary>
@@ -58,13 +58,13 @@ namespace StratifiedEventQueue
         /// <param name="a">The first argument.</param>
         /// <param name="b">The second argument.</param>
         /// <returns>The result.</returns>
-        public static Logic Nor(Logic a, Logic b)
+        public static Signal Nor(Signal a, Signal b)
         {
-            if (a == Logic.H || b == Logic.H)
-                return Logic.L;
-            if (a == Logic.L && b == Logic.L)
-                return Logic.H;
-            return Logic.X;
+            if (a == Signal.H || b == Signal.H)
+                return Signal.L;
+            if (a == Signal.L && b == Signal.L)
+                return Signal.H;
+            return Signal.X;
         }
 
         /// <summary>
@@ -73,13 +73,13 @@ namespace StratifiedEventQueue
         /// <param name="a">The first argument.</param>
         /// <param name="b">The second argument.</param>
         /// <returns>The result.</returns>
-        public static Logic Xor(Logic a, Logic b)
+        public static Signal Xor(Signal a, Signal b)
         {
-            if (a == Logic.L && b == Logic.H || a == Logic.H && b == Logic.L)
-                return Logic.H;
-            if (a == Logic.L && b == Logic.L || a == Logic.H && b == Logic.H)
-                return Logic.L;
-            return Logic.X;
+            if (a == Signal.L && b == Signal.H || a == Signal.H && b == Signal.L)
+                return Signal.H;
+            if (a == Signal.L && b == Signal.L || a == Signal.H && b == Signal.H)
+                return Signal.L;
+            return Signal.X;
         }
 
         /// <summary>
@@ -88,13 +88,13 @@ namespace StratifiedEventQueue
         /// <param name="a">The first argument.</param>
         /// <param name="b">The second argument.</param>
         /// <returns>The result.</returns>
-        public static Logic Xnor(Logic a, Logic b)
+        public static Signal Xnor(Signal a, Signal b)
         {
-            if (a == Logic.L && b == Logic.H || a == Logic.H && b == Logic.L)
-                return Logic.L;
-            if (a == Logic.L && b == Logic.L || a == Logic.H && b == Logic.H)
-                return Logic.H;
-            return Logic.X;
+            if (a == Signal.L && b == Signal.H || a == Signal.H && b == Signal.L)
+                return Signal.L;
+            if (a == Signal.L && b == Signal.L || a == Signal.H && b == Signal.H)
+                return Signal.H;
+            return Signal.X;
         }
 
         /// <summary>
@@ -102,10 +102,10 @@ namespace StratifiedEventQueue
         /// </summary>
         /// <param name="a">The argument.</param>
         /// <returns>The second argument.</returns>
-        public static Logic Buf(Logic a)
+        public static Signal Buf(Signal a)
         {
-            if (a == Logic.Z)
-                return Logic.X;
+            if (a == Signal.Z)
+                return Signal.X;
             return a;
         }
 
@@ -114,16 +114,16 @@ namespace StratifiedEventQueue
         /// </summary>
         /// <param name="a">The argument.</param>
         /// <returns>The result.</returns>
-        public static Logic Not(Logic a)
+        public static Signal Not(Signal a)
         {
             switch (a)
             {
-                case Logic.L:
-                    return Logic.H;
-                case Logic.H:
-                    return Logic.L;
+                case Signal.L:
+                    return Signal.H;
+                case Signal.H:
+                    return Signal.L;
                 default:
-                    return Logic.X;
+                    return Signal.X;
             }
         }
 
@@ -133,28 +133,28 @@ namespace StratifiedEventQueue
         /// <param name="c">The character.</param>
         /// <returns>The signal value.</returns>
         /// <exception cref="ArgumentException">Thrown if the character is an invalid character.</exception>
-        public static Logic ToLogic(this char c)
+        public static Signal ToLogic(this char c)
         {
             switch (c)
             {
                 case 'x':
                 case 'X':
-                    return Logic.X;
+                    return Signal.X;
 
                 case '0':
                 case 'L':
                 case 'l':
-                    return Logic.L;
+                    return Signal.L;
 
                 case '1':
                 case 'H':
                 case 'h':
-                    return Logic.H;
+                    return Signal.H;
 
                 case 'z':
                 case 'Z':
                 case '?':
-                    return Logic.Z;
+                    return Signal.Z;
 
                 default:
                     throw new ArgumentException(string.Format("Invalid signal value '{0}'", c));
@@ -170,9 +170,9 @@ namespace StratifiedEventQueue
         /// <param name="s">The string.</param>
         /// <returns>The signal values.</returns>
         /// <exception cref="ArgumentException">Thrown if the input is invalid.</exception>
-        public static Logic[] ToLogic(this string s)
+        public static Signal[] ToLogic(this string s)
         {
-            var result = new Logic[s.Length];
+            var result = new Signal[s.Length];
             for (int i = 0; i < s.Length; i++)
                 result[i] = ToLogic(s[i]);
             return result;
@@ -187,9 +187,9 @@ namespace StratifiedEventQueue
         /// <param name="s">The string.</param>
         /// <returns>The signal values.</returns>
         /// <exception cref="ArgumentException">Thrown if the input is invalid.</exception>
-        public static Logic[] ToLogicOctal(string s)
+        public static Signal[] ToLogicOctal(string s)
         {
-            var result = new Logic[s.Length * 3];
+            var result = new Signal[s.Length * 3];
             int index = 0;
             for (int i = 0; i < s.Length; i++)
             {
@@ -201,21 +201,21 @@ namespace StratifiedEventQueue
                     for (int j = 0; j < 2; j++)
                     {
                         if ((value & mask) != 0)
-                            result[index++] = Logic.H;
+                            result[index++] = Signal.H;
                         else
-                            result[index++] = Logic.L;
+                            result[index++] = Signal.L;
                         mask <<= 1;
                     }
                 }
                 else if (c == 'x' || c == 'X')
                 {
                     for (int j = 0; j < 2; j++)
-                        result[index++] = Logic.X;
+                        result[index++] = Signal.X;
                 }
                 else if (c == 'z' || c == 'Z' || c == '?')
                 {
                     for (int j = 0; j < 2; j++)
-                        result[index++] = Logic.Z;
+                        result[index++] = Signal.Z;
                 }
                 else
                     throw new ArgumentException(string.Format("Invalid signal value '{0}'", c));
@@ -232,9 +232,9 @@ namespace StratifiedEventQueue
         /// <param name="s">The string.</param>
         /// <returns>The signal values.</returns>
         /// <exception cref="ArgumentException">Thrown if the input is invalid.</exception>
-        public static Logic[] ToLogicHex(this string s)
+        public static Signal[] ToLogicHex(this string s)
         {
-            var result = new Logic[s.Length * 4];
+            var result = new Signal[s.Length * 4];
             int index = 0;
             for (int i = 0; i < s.Length; i++)
             {
@@ -246,21 +246,21 @@ namespace StratifiedEventQueue
                     for (int j = 0; j < 3; j++)
                     {
                         if ((value & mask) != 0)
-                            result[index++] = Logic.H;
+                            result[index++] = Signal.H;
                         else
-                            result[index++] = Logic.L;
+                            result[index++] = Signal.L;
                         mask <<= 1;
                     }
                 }
                 else if (c == 'x' || c == 'X')
                 {
                     for (int j = 0; j < 3; j++)
-                        result[index++] = Logic.X;
+                        result[index++] = Signal.X;
                 }
                 else if (c == 'z' || c == 'Z' || c == '?')
                 {
                     for (int j = 0; j < 3; j++)
-                        result[index++] = Logic.Z;
+                        result[index++] = Signal.Z;
                 }
                 else
                     throw new ArgumentException(string.Format("Invalid signal value '{0}'", c));
@@ -273,18 +273,18 @@ namespace StratifiedEventQueue
         /// </summary>
         /// <param name="s">The string.</param>
         /// <returns>The signal values.</returns>
-        public static Logic[] ToLogicDec(string s)
+        public static Signal[] ToLogicDec(string s)
         {
-            var result = new Logic[32];
+            var result = new Signal[32];
             if (s == "X" || s == "x")
             {
                 for (int i = 0; i < 32; i++)
-                    result[i] = Logic.X;
+                    result[i] = Signal.X;
             }
             else if (s == "Z" || s == "z" || s == "?")
             {
                 for (int i = 0; i < 32; i++)
-                    result[i] = Logic.Z;
+                    result[i] = Signal.Z;
             }
             else
             {
@@ -293,9 +293,9 @@ namespace StratifiedEventQueue
                 for (int i = 0; i < 32; i++)
                 {
                     if ((value & mask) != 0)
-                        result[i] = Logic.H;
+                        result[i] = Signal.H;
                     else
-                        result[i] = Logic.L;
+                        result[i] = Signal.L;
                     mask <<= 1;
                 }
             }

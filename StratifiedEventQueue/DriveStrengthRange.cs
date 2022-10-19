@@ -7,7 +7,7 @@ namespace StratifiedEventQueue
     /// <summary>
     /// A range of strengths, possibly ambiguous.
     /// </summary>
-    public struct StrengthRange : IEquatable<StrengthRange>
+    public struct DriveStrengthRange : IEquatable<DriveStrengthRange>
     {
         /// <summary>
         /// Gets the low end of the strength range.
@@ -22,34 +22,34 @@ namespace StratifiedEventQueue
         /// <summary>
         /// Gets the equivalent logic value, based on the strength levels.
         /// </summary>
-        public Logic Logic
+        public Signal Logic
         {
             get
             {
                 // Both strengths are in the value 1 range
                 if (Low > Strength.HiZ1)
-                    return Logic.H;
+                    return Signal.H;
 
                 // Both strengths are in the value 0 range
                 if (High < Strength.HiZ0)
-                    return Logic.L;
+                    return Signal.L;
 
                 // Both values are in the high-Z range
                 if (Low >= Strength.HiZ0 && High <= Strength.HiZ1)
-                    return Logic.Z;
+                    return Signal.Z;
 
                 // We don't know...
-                return Logic.X;
+                return Signal.X;
             }
         }
 
         /// <summary>
-        /// Creates a new <see cref="StrengthRange"/>.
+        /// Creates a new <see cref="DriveStrengthRange"/>.
         /// </summary>
         /// <remarks>Allow ambiguous strengths.</remarks>
         /// <param name="low">The low end.</param>
         /// <param name="high">The high end.</param>
-        public StrengthRange(Strength low, Strength high)
+        public DriveStrengthRange(Strength low, Strength high)
         {
             if (low < high)
             {
@@ -64,11 +64,11 @@ namespace StratifiedEventQueue
         }
 
         /// <summary>
-        /// Creates a new <see cref="StrengthRange"/>.
+        /// Creates a new <see cref="DriveStrengthRange"/>.
         /// </summary>
         /// <remarks>A nonambiguous strength.</remarks>
         /// <param name="strength">The strength.</param>
-        public StrengthRange(Strength strength)
+        public DriveStrengthRange(Strength strength)
         {
             Low = strength;
             High = strength;
@@ -87,7 +87,7 @@ namespace StratifiedEventQueue
         /// <returns>Returns <c>true</c> if the object is equal; otherwise, <c>false</c>.</returns>
         public override bool Equals(object obj)
         {
-            if (obj is StrengthRange range)
+            if (obj is DriveStrengthRange range)
                 return Equals(range);
             return false;
         }
@@ -97,7 +97,7 @@ namespace StratifiedEventQueue
         /// </summary>
         /// <param name="other">The other.</param>
         /// <returns>Returns <c>true</c> if the range is equal to the other range; otherwise, <c>false</c>.</returns>
-        public bool Equals(StrengthRange other) => other.High == High && other.Low == Low;
+        public bool Equals(DriveStrengthRange other) => other.High == High && other.Low == Low;
 
         /// <summary>
         /// Converts the range to a string.
@@ -198,7 +198,7 @@ namespace StratifiedEventQueue
         /// <param name="a">The left argument.</param>
         /// <param name="b">The right argument.</param>
         /// <returns>Returns <c>true</c> if both ranges are equal; otherwise, <c>false</c>.</returns>
-        public static bool operator ==(StrengthRange a, StrengthRange b) => a.Low == b.Low && a.High == b.High;
+        public static bool operator ==(DriveStrengthRange a, DriveStrengthRange b) => a.Low == b.Low && a.High == b.High;
 
         /// <summary>
         /// Checks inequality between two strength ranges.
@@ -206,7 +206,7 @@ namespace StratifiedEventQueue
         /// <param name="a">The left argument.</param>
         /// <param name="b">The right argument.</param>
         /// <returns>Returns <c>true</c> if both ranges are not equal; otherwise, <c>false</c>.</returns>
-        public static bool operator !=(StrengthRange a, StrengthRange b) => a.Low != b.Low || a.High != b.High;
+        public static bool operator !=(DriveStrengthRange a, DriveStrengthRange b) => a.Low != b.Low || a.High != b.High;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static sbyte Abs(Strength a) => a > Strength.None ? (sbyte)a : (Strength.None - a);
@@ -217,19 +217,19 @@ namespace StratifiedEventQueue
         /// <param name="a">The first strength.</param>
         /// <param name="b">The second strength.</param>
         /// <returns>The result.</returns>
-        public static StrengthRange Combine(Strength a, Strength b)
+        public static DriveStrengthRange Combine(Strength a, Strength b)
         {
             var sa = Abs(a);
             var sb = Abs(b);
 
             // If one strength is higher, use that
             if (sa > sb)
-                return new StrengthRange(a);
+                return new DriveStrengthRange(a);
             if (sb > sa)
-                return new StrengthRange(b);
+                return new DriveStrengthRange(b);
 
             // Same strength, combine both
-            return new StrengthRange(a, b);
+            return new DriveStrengthRange(a, b);
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace StratifiedEventQueue
         /// <param name="a">The first strength.</param>
         /// <param name="b">The second strength.</param>
         /// <returns>The result.</returns>
-        public static StrengthRange Wired(StrengthRange a, StrengthRange b)
+        public static DriveStrengthRange Wired(DriveStrengthRange a, DriveStrengthRange b)
         {
             Strength low = Strength.Su1, high = Strength.Su0;
             for (var i = a.Low; i <= a.High; i++)
@@ -252,7 +252,7 @@ namespace StratifiedEventQueue
                         high = r.High;
                 }
             }
-            return new StrengthRange(low, high);
+            return new DriveStrengthRange(low, high);
         }
 
         /// <summary>
@@ -335,7 +335,7 @@ namespace StratifiedEventQueue
         /// <param name="a">The first strength range.</param>
         /// <param name="b">The second strength range.</param>
         /// <returns>The result.</returns>
-        public static StrengthRange WiredAnd(StrengthRange a, StrengthRange b)
+        public static DriveStrengthRange WiredAnd(DriveStrengthRange a, DriveStrengthRange b)
         {
             Strength low = Strength.Su1, high = Strength.Su0;
             for (var i = a.Low; i <= a.High; i++)
@@ -349,7 +349,7 @@ namespace StratifiedEventQueue
                         high = r;
                 }
             }
-            return new StrengthRange(low, high);
+            return new DriveStrengthRange(low, high);
         }
 
         /// <summary>
@@ -358,7 +358,7 @@ namespace StratifiedEventQueue
         /// <param name="a">The first strength range.</param>
         /// <param name="b">The second strength range.</param>
         /// <returns>The result.</returns>
-        public static StrengthRange WiredOr(StrengthRange a, StrengthRange b)
+        public static DriveStrengthRange WiredOr(DriveStrengthRange a, DriveStrengthRange b)
         {
             Strength low = Strength.Su1, high = Strength.Su0;
             for (var i = a.Low; i <= a.High; i++)
@@ -372,7 +372,7 @@ namespace StratifiedEventQueue
                         high = r;
                 }
             }
-            return new StrengthRange(low, high);
+            return new DriveStrengthRange(low, high);
         }
     }
 }
