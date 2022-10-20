@@ -1,4 +1,4 @@
-﻿namespace StratifiedEventQueue
+﻿namespace StratifiedEventQueue.States
 {
     /// <summary>
     /// An enumeration of Logic.Logic values.

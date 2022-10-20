@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace StratifiedEventQueue
+namespace StratifiedEventQueue.States.Nets
 {
     /// <summary>
     /// A range of strengths, possibly ambiguous.
@@ -78,7 +78,7 @@ namespace StratifiedEventQueue
         /// Creates a hash code for the drive strength range.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode() => ((int)High << 8) | (int)Low;
+        public override int GetHashCode() => (int)High << 8 | (int)Low;
 
         /// <summary>
         /// Checks equality.
@@ -209,7 +209,7 @@ namespace StratifiedEventQueue
         public static bool operator !=(DriveStrengthRange a, DriveStrengthRange b) => a.Low != b.Low || a.High != b.High;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static sbyte Abs(Strength a) => a > Strength.None ? (sbyte)a : (Strength.None - a);
+        private static sbyte Abs(Strength a) => a > Strength.None ? (sbyte)a : Strength.None - a;
 
         /// <summary>
         /// Combines two driving strengths.

@@ -36,13 +36,13 @@ namespace StratifiedEventQueue.Test.Events
 
             ulong time = 0;
             int index = 0;
-            void Check(object? sender, ValueChangedEventArgs<int> args)
+            void Check(object? sender, StateChangedEventArgs<int> args)
             {
                 if (deltas == null || values == null)
                     throw new ArgumentNullException(nameof(deltas));
                 time += deltas[index];
                 Assert.Equal(time, args.Scheduler.CurrentTime);
-                Assert.Equal(values[index], args.Variable.Value);
+                Assert.Equal(values[index], args.State.Value);
                 index++;
             }
             v.Changed += Check;
@@ -63,12 +63,12 @@ namespace StratifiedEventQueue.Test.Events
 
             ulong time = 0;
             int index = 0;
-            void Check(object? sender, ValueChangedEventArgs<int> args)
+            void Check(object? sender, StateChangedEventArgs<int> args)
             {
                 if (values == null)
                     throw new ArgumentNullException(nameof(values));
                 Assert.Equal(time, args.Scheduler.CurrentTime);
-                Assert.Equal(values[index], args.Variable.Value);
+                Assert.Equal(values[index], args.State.Value);
                 index++;
                 time += 10;
             }

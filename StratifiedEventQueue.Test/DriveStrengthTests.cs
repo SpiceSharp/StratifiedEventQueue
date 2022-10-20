@@ -1,4 +1,7 @@
-﻿namespace StratifiedEventQueue.Test
+﻿using StratifiedEventQueue.States;
+using StratifiedEventQueue.States.Nets;
+
+namespace StratifiedEventQueue.Test
 {
     public class DriveStrengthTests
     {

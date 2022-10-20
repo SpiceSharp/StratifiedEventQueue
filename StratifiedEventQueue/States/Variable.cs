@@ -8,38 +8,8 @@ namespace StratifiedEventQueue.States
     /// A variable that can be changed and emits events when it does.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Variable<T>
+    public class Variable<T> : State<T>
     {
-        /// <summary>
-        /// Gets the comparer used by the variable.
-        /// </summary>
-        public IEqualityComparer<T> Comparer { get; }
-
-        /// <summary>
-        /// Occurs when the value of the variable changed.
-        /// </summary>
-        public event EventHandler<ValueChangedEventArgs<T>> Changed;
-
-        /// <summary>
-        /// Gets the name of the variable.
-        /// </summary>
-        public string Name { get; }
-
-        /// <summary>
-        /// Gets the previous (old) value of the variable.
-        /// </summary>
-        public T OldValue { get; private set; }
-
-        /// <summary>
-        /// Gets the current value of the variable.
-        /// </summary>
-        public T Value { get; private set; }
-
-        /// <summary>
-        /// Gets the time when the last change happened.
-        /// </summary>
-        public ulong ChangeTime { get; private set; }
-
         /// <summary>
         /// Creates a new <see cref="Variable{T}"/>.
         /// </summary>
@@ -47,11 +17,8 @@ namespace StratifiedEventQueue.States
         /// <param name="initialValue">The initial value.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/> is <c>null</c>.</exception>
         public Variable(string name, T initialValue = default, IEqualityComparer<T> comparer = null)
+            : base(name, initialValue, comparer)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
-            Comparer = comparer ?? EqualityComparer<T>.Default;
-            OldValue = initialValue;
-            Value = initialValue;
         }
 
         /// <summary>
@@ -60,30 +27,6 @@ namespace StratifiedEventQueue.States
         /// <param name="scheduler">The scheduler.</param>
         /// <param name="value">The value.</param>
         public void Update(IScheduler scheduler, T value)
-        {
-            if (Comparer.Equals(Value, value))
-                return; // No change
-
-            // Update the variable
-            ChangeTime = scheduler.CurrentTime;
-            OldValue = Value;
-            Value = value;
-            OnChanged(ValueChangedEventArgs<T>.Create(scheduler, this));
-        }
-
-        /// <summary>
-        /// Called when the value of the variable changes.
-        /// </summary>
-        /// <param name="args">The argument.</param>
-        protected virtual void OnChanged(ValueChangedEventArgs<T> args)
-        {
-            Changed?.Invoke(this, args);
-        }
-
-        /// <summary>
-        /// Converts the variable to a string.
-        /// </summary>
-        /// <returns>The string.</returns>
-        public override string ToString() => Name;
+            => Change(scheduler, value);
     }
 }

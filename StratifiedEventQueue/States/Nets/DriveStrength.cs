@@ -1,4 +1,4 @@
-﻿namespace StratifiedEventQueue
+﻿namespace StratifiedEventQueue.States.Nets
 {
     /// <summary>
     /// Represents a strength level as defined by the Verilog standard.

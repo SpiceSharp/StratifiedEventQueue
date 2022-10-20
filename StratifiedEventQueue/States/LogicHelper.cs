@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StratifiedEventQueue
+namespace StratifiedEventQueue.States
 {
     /// <summary>
     /// A comparer that can be used for signal values as defined by the verilog-A standard.
@@ -174,7 +174,7 @@ namespace StratifiedEventQueue
         {
             var result = new Signal[s.Length];
             for (int i = 0; i < s.Length; i++)
-                result[i] = ToLogic(s[i]);
+                result[i] = s[i].ToLogic();
             return result;
         }
 

@@ -86,10 +86,10 @@ namespace StratifiedEventQueue.Test.Simulation
             // Now let us create an inertial delay inverter
             EventNode? nextEvent = null;
             ulong nextEventTime = 0;
-            void InertialDelayInverter(object? sender, ValueChangedEventArgs<Signal> args)
+            void InertialDelayInverter(object? sender, StateChangedEventArgs<Signal> args)
             {
-                var value = LogicHelper.Not(args.Variable.Value);
-                ulong delay = args.Variable.Value switch
+                var value = LogicHelper.Not(args.State.Value);
+                ulong delay = args.State.Value switch
                 {
                     Signal.L => 2,
                     Signal.H => 1,
@@ -114,10 +114,10 @@ namespace StratifiedEventQueue.Test.Simulation
             int index = 0;
             var expectedTime = new ulong[] { 2, 4, 5, 10, 12 };
             var expectedValues = "01010".ToLogic();
-            void CheckWaveform(object? sender, ValueChangedEventArgs<Signal> args)
+            void CheckWaveform(object? sender, StateChangedEventArgs<Signal> args)
             {
                 Assert.Equal(expectedTime[index], args.Scheduler.CurrentTime);
-                Assert.Equal(expectedValues[index], args.Variable.Value);
+                Assert.Equal(expectedValues[index], args.State.Value);
                 index++;
             }
             output.Changed += CheckWaveform;
@@ -148,7 +148,7 @@ namespace StratifiedEventQueue.Test.Simulation
             // The T-flip-flop definition, with only sensitivity to the clock
             clk.Changed += (sender, args) =>
             {
-                if (clk.OldValue == Signal.L && clk.Value == Signal.H)
+                if (args.OldValue == Signal.L && args.State.Value == Signal.H)
                 {
                     // Posedge reached, toggle the output
                     args.Scheduler.ScheduleInactive(0, AssignmentEvent<Signal>.Create(output, LogicHelper.Not(output.Value)));
@@ -157,7 +157,7 @@ namespace StratifiedEventQueue.Test.Simulation
 
             // Checking the output
             int index = 0;
-            void Check(object? sender, ValueChangedEventArgs<Signal> args)
+            void Check(object? sender, StateChangedEventArgs<Signal> args)
             {
                 Assert.Equal((ulong)(5 + index * 10), args.Scheduler.CurrentTime);
                 if ((index % 2) == 0)
@@ -193,15 +193,20 @@ namespace StratifiedEventQueue.Test.Simulation
             scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(rst, 22, new Signal[] { Signal.L, Signal.H }));
 
             // Define the working of the flip-flop
-            void Dflipflop(IScheduler scheduler)
+            clk.Changed += (sender, args) =>
             {
+                // The part sensitive to the clock
                 if (rst.Value == Signal.H)
-                    scheduler.Schedule(AssignmentEvent<Signal>.Create(q, Signal.L));
-                else if (clk.Value == Signal.H && clk.OldValue == Signal.L && clk.ChangeTime == scheduler.CurrentTime)
-                    scheduler.Schedule(AssignmentEvent<Signal>.Create(q, d.Value));
-            }
-            clk.Changed += (sender, args) => Dflipflop(args.Scheduler);
-            rst.Changed += (sender, args) => Dflipflop(args.Scheduler);
+                    q.Update(args.Scheduler, Signal.L);
+                else if (args.State.Value == Signal.H && args.OldValue == Signal.L)
+                    q.Update(args.Scheduler, d.Value);
+            };
+            rst.Changed += (sender, args) =>
+            {
+                // The part sensitive to the reset
+                if (rst.Value == Signal.H)
+                    q.Update(args.Scheduler, Signal.L);
+            };
 
             // Check the output
             var times = new ulong[] { 5, 15, 22  };
@@ -210,7 +215,7 @@ namespace StratifiedEventQueue.Test.Simulation
             q.Changed += (sender, args) =>
             {
                 Assert.Equal(times[index], args.Scheduler.CurrentTime);
-                Assert.Equal(values[index], args.Variable.Value);
+                Assert.Equal(values[index], args.State.Value);
                 index++;
             };
 

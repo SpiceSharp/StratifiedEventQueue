@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using StratifiedEventQueue.Simulation;
 
 namespace StratifiedEventQueue.States
@@ -7,15 +6,10 @@ namespace StratifiedEventQueue.States
     /// <summary>
     /// Event arguments for a variable that changed.
     /// </summary>
-    public class ValueChangedEventArgs<T> : EventArgs
+    public class StateChangedEventArgs<T> : EventArgs
     {
-        private static readonly System.Collections.Generic.Queue<ValueChangedEventArgs<T>> _pool 
-            = new System.Collections.Generic.Queue<ValueChangedEventArgs<T>>(InitialPoolSize);
-
-        /// <summary>
-        /// The initial pool size.
-        /// </summary>
-        public const int InitialPoolSize = 20;
+        private static readonly System.Collections.Generic.Queue<StateChangedEventArgs<T>> _pool 
+            = new System.Collections.Generic.Queue<StateChangedEventArgs<T>>();
 
         /// <summary>
         /// Gets the scheduler the variable is associated with.
@@ -28,13 +22,18 @@ namespace StratifiedEventQueue.States
         /// <summary>
         /// Gets the variable that has changed.
         /// </summary>
-        public Variable<T> Variable { get; private set; }
+        public IState<T> State { get; private set; }
 
         /// <summary>
-        /// Creates a new <see cref="ValueChangedEventArgs{T}"/>.
+        /// Gets the old (previous) value of the state.
+        /// </summary>
+        public T OldValue { get; private set; }
+
+        /// <summary>
+        /// Creates a new <see cref="StateChangedEventArgs{T}"/>.
         /// </summary>
         /// <param name="variable">The variable.</param>
-        private ValueChangedEventArgs()
+        private StateChangedEventArgs()
         {
         }
 
@@ -47,21 +46,18 @@ namespace StratifiedEventQueue.States
         }
 
         /// <summary>
-        /// Creates a new <see cref="ValueChangedEventArgs{T}"/>, trying to use a pool of reusable
+        /// Creates a new <see cref="StateChangedEventArgs{T}"/>, trying to use a pool of reusable
         /// objects.
         /// </summary>
         /// <param name="scheduler">The scheduler.</param>
-        /// <param name="variable">The variable.</param>
+        /// <param name="state">The state.</param>
         /// <returns>The event arguments.</returns>
-        public static ValueChangedEventArgs<T> Create(IScheduler scheduler, Variable<T> variable)
+        public static StateChangedEventArgs<T> Create(IScheduler scheduler, IState<T> state, T oldValue)
         {
-            ValueChangedEventArgs<T> result;
-            if (_pool.Count > 0)
-                result = _pool.Dequeue();
-            else
-                result = new ValueChangedEventArgs<T>();
-            result.Variable = variable;
+            StateChangedEventArgs<T> result = _pool.Count > 0 ? _pool.Dequeue() : new StateChangedEventArgs<T>();
+            result.State = state;
             result.Scheduler = scheduler;
+            result.OldValue = oldValue;
             return result;
         }
     }
