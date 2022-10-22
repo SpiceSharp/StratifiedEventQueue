@@ -53,7 +53,7 @@ namespace StratifiedEventQueue.States
             // Update the variable
             var args = StateChangedEventArgs<T>.Create(scheduler, this, Value);
             Value = newValue;
-            OnChange(args);
+            OnChanged(args);
             args.Release();
         }
 
@@ -61,7 +61,7 @@ namespace StratifiedEventQueue.States
         /// Called when the value of the variable changes.
         /// </summary>
         /// <param name="args">The argument.</param>
-        protected virtual void OnChange(StateChangedEventArgs<T> args)
+        protected virtual void OnChanged(StateChangedEventArgs<T> args)
             => Changed?.Invoke(this, args);
 
         /// <summary>

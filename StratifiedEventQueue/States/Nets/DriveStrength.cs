@@ -8,7 +8,7 @@
         /// <summary>
         /// No drive strength.
         /// </summary>
-        None = 0x00,
+        None = 0,
 
         /// <summary>
         /// Represents a HiZ0 (High-Z 0) drive strength.

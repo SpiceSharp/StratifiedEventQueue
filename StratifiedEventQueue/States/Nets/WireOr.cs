@@ -3,15 +3,15 @@
 namespace StratifiedEventQueue.States.Nets
 {
     /// <summary>
-    /// A wire or tri that performs wire logic in case of conflicting drivers.
+    /// A wor or trior net that performs OR logic in case of conflicting drivers.
     /// </summary>
-    public class Wire : WiredNet
+    public class WireOr : WiredNet
     {
         /// <summary>
         /// Creates a new <see cref="Wire"/>.
         /// </summary>
         /// <param name="name">The name of the wire.</param>
-        public Wire(string name)
+        public WireOr(string name)
             : base(name)
         {
         }
@@ -25,7 +25,7 @@ namespace StratifiedEventQueue.States.Nets
             // Compute the combined result using wire logic
             var result = inputs[0];
             for (int i = 1; i < inputs.Count; i++)
-                result = DriveStrengthRange.Wired(result, inputs[i]);
+                result = DriveStrengthRange.WiredOr(result, inputs[i]);
             return result;
         }
     }

@@ -81,7 +81,8 @@ namespace StratifiedEventQueue.Test.Simulation
             var scheduler = new Scheduler();
 
             // We first create a waveform to test our inertial delay
-            CreateWaveform(scheduler, input, new ulong[] { 0, 1, 2, 4, 6, 7, 8, 11 }, "01010101".ToLogic());
+            var waveform = WaveformEvent<Signal>.Create(input, new ulong[] { 0, 1, 1, 2, 2, 1, 1, 3 }.Zip("01010101".ToLogic()).Select(a => KeyValuePair.Create(a.First, a.Second)));
+            scheduler.ScheduleInactive(0, waveform);
 
             // Now let us create an inertial delay inverter
             EventNode? nextEvent = null;
@@ -225,14 +226,6 @@ namespace StratifiedEventQueue.Test.Simulation
 
             // Make sure we have finished
             Assert.Equal(times.Length, index);
-        }
-
-        private void CreateWaveform<T>(Scheduler scheduler, Variable<T> variable, ulong[] time, T[] values)
-        {
-            for (int i = 0; i < time.Length; i++)
-            {
-                scheduler.ScheduleInactive(time[i], AssignmentEvent<T>.Create(variable, values[i]));
-            }
         }
     }
 }

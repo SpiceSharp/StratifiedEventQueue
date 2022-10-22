@@ -1,7 +1,7 @@
 ﻿using StratifiedEventQueue.States;
 using StratifiedEventQueue.States.Nets;
 
-namespace StratifiedEventQueue.Test
+namespace StratifiedEventQueue.Test.States.Nets
 {
     public class DriveStrengthTests
     {
