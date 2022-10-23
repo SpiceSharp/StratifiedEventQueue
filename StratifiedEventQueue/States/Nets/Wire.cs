@@ -28,5 +28,11 @@ namespace StratifiedEventQueue.States.Nets
                 result = DriveStrengthRange.Wired(result, inputs[i]);
             return result;
         }
+
+        /// <summary>
+        /// Converts the wire to a string.
+        /// </summary>
+        /// <returns>The string.</returns>
+        public override string ToString() => $"wire {Name}";
     }
 }

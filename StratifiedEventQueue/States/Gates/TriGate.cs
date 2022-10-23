@@ -8,7 +8,7 @@ namespace StratifiedEventQueue.States.Gates
     /// <summary>
     /// Describes a gate that can have a tri-state output.
     /// </summary>
-    public abstract class TriGate : State<DriveStrengthRange>, IState<Signal>
+    public abstract class TriGate : State<DriveStrengthRange>, IState<Signal>, IGate
     {
         private EventNode _nextEvent = null;
         private ulong _nextEventTime = 0;
@@ -33,22 +33,22 @@ namespace StratifiedEventQueue.States.Gates
         /// <summary>
         /// Gets the delay for rising signals.
         /// </summary>
-        public ulong RiseDelay { get; }
+        public uint RiseDelay { get; }
 
         /// <summary>
         /// Gets the delay for falling signals.
         /// </summary>
-        public ulong FallDelay { get; }
+        public uint FallDelay { get; }
 
         /// <summary>
         /// Gets the delay for turning off.
         /// </summary>
-        public ulong TurnOffDelay { get; }
+        public uint TurnOffDelay { get; }
 
         /// <summary>
         /// Gets the delay for unknown transitions.
         /// </summary>
-        public ulong UnknownDelay { get; }
+        public uint UnknownDelay { get; }
 
         protected class AssignmentEvent : Event
         {
@@ -74,7 +74,7 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="turnOffDelay">The delay for signals turning off.</param>
         /// <exception cref="ArgumentNullException">Thrown if any argument is <c>null</c>.</exception>
         public TriGate(string gateName, string outputName,
-            ulong riseDelay, ulong fallDelay, ulong turnOffDelay)
+            uint riseDelay, uint fallDelay, uint turnOffDelay)
             : base(outputName)
         {
             GateName = gateName ?? throw new ArgumentNullException(nameof(gateName));

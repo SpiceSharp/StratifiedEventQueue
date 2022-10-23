@@ -7,7 +7,7 @@ namespace StratifiedEventQueue.States.Gates
     /// <summary>
     /// Describes a gate that can be either high or low at the output.
     /// </summary>
-    public abstract class Gate : State<Signal>
+    public abstract class Gate : State<Signal>, IGate
     {
         private EventNode _nextEvent = null;
         private ulong _nextEventTime = 0;
@@ -21,12 +21,12 @@ namespace StratifiedEventQueue.States.Gates
         /// <summary>
         /// Gets the delay for rising signals.
         /// </summary>
-        public ulong RiseDelay { get; }
+        public uint RiseDelay { get; }
 
         /// <summary>
         /// Gets the delay for falling signals.
         /// </summary>
-        public ulong FallDelay { get; }
+        public uint FallDelay { get; }
 
         protected class AssignmentEvent : Event
         {
@@ -49,9 +49,8 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="outputName">The name of the output state.</param>
         /// <param name="fallDelay">The delay for signals going to the low state.</param>
         /// <param name="riseDelay">The delay for signals going to the high state.</param>
-        /// <param name="turnOffDelay">The delay for signals turning off (high-Z state).</param>
         /// <exception cref="ArgumentNullException">Thrown if any argument is <c>null</c>.</exception>
-        public Gate(string gateName, string outputName, ulong riseDelay, ulong fallDelay)
+        public Gate(string gateName, string outputName, uint riseDelay, uint fallDelay)
             : base(outputName)
         {
             GateName = gateName ?? throw new ArgumentNullException(nameof(gateName));
