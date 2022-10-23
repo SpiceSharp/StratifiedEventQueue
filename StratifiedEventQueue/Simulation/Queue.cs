@@ -1,4 +1,6 @@
-﻿namespace StratifiedEventQueue.Simulation
+﻿using System.Collections.Concurrent;
+
+namespace StratifiedEventQueue.Simulation
 {
     /// <summary>
     /// A queue implementation using a linked list.
@@ -19,12 +21,12 @@
         {
             // It's a bit strange that we have a queue inside something that should be describing a queue
             // The reason is that we want to be able to quickly swap queues around, without having the
-            // underlying arrays of System.Collections.Generic.Queue<T> blowing up too much.
+            // underlying arrays of the queues blowing up too much.
             // If there is only one step every 100 that is very heavy on events, but the arrays are swapped
             // around, all arrays will end up needing to allocate a large number of events.
             // If we have a single queue for our pool, there is only one block of memory allocated for
             // node reuse.
-            private static readonly System.Collections.Generic.Queue<Node> _pool = new System.Collections.Generic.Queue<Node>();
+            private static readonly ConcurrentQueue<Node> _pool = new ConcurrentQueue<Node>();
 
             /// <summary>
             /// Gets the value of the queue node.
@@ -56,7 +58,8 @@
             /// <returns></returns>
             public static Node Create(T value)
             {
-                var result = _pool.Count > 0 ? _pool.Dequeue() : new Node();
+                if (!_pool.TryDequeue(out var result))
+                    result = new Node();
                 result.Value = value;
                 result.Next = null;
                 return result;

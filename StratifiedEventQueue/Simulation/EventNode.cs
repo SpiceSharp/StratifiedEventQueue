@@ -1,4 +1,5 @@
 ﻿using StratifiedEventQueue.Events;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace StratifiedEventQueue.Simulation
@@ -8,7 +9,7 @@ namespace StratifiedEventQueue.Simulation
     /// </summary>
     public class EventNode
     {
-        private static readonly System.Collections.Generic.Queue<EventNode> _pool = new System.Collections.Generic.Queue<EventNode>();
+        private static readonly ConcurrentQueue<EventNode> _pool = new ConcurrentQueue<EventNode>();
 
         /// <summary>
         /// Gets the event that needs to be executed.
@@ -46,7 +47,8 @@ namespace StratifiedEventQueue.Simulation
         /// <returns>The event node.</returns>
         public static EventNode Create(Event @event)
         {
-            EventNode result = _pool.Count > 0 ? _pool.Dequeue() : new EventNode();
+            if (!_pool.TryDequeue(out var result))
+                result = new EventNode();
             result.IsScheduled = true;
             result.Event = @event;
             return result;

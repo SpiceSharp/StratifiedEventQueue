@@ -32,6 +32,7 @@ namespace StratifiedEventQueue.States.Gates
         {
             A = a ?? throw new ArgumentNullException(nameof(a));
             B = b ?? throw new ArgumentNullException(nameof(b));
+            Value = ComputeSignal();
             if (riseDelay == 0 && fallDelay == 0)
             {
                 A.Changed += UpdateZeroDelay;

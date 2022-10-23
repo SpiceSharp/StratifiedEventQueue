@@ -1,6 +1,6 @@
 ﻿using StratifiedEventQueue.Simulation;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace StratifiedEventQueue.Events
 {
@@ -9,8 +9,7 @@ namespace StratifiedEventQueue.Events
     /// </summary>
     public class CallbackEvent : Event
     {
-        private readonly static System.Collections.Generic.Queue<CallbackEvent> _pool
-            = new System.Collections.Generic.Queue<CallbackEvent>();
+        private readonly static ConcurrentQueue<CallbackEvent> _pool = new ConcurrentQueue<CallbackEvent>();
 
         /// <summary>
         /// Gets the action that will be executed for the event.
@@ -41,7 +40,8 @@ namespace StratifiedEventQueue.Events
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="action"/> is <c>null</c>.</exception>
         public static CallbackEvent Create(Action<IScheduler> action)
         {
-            CallbackEvent result = _pool.Count > 0 ? _pool.Dequeue() : new CallbackEvent();
+            if (!_pool.TryDequeue(out var result))
+                result = new CallbackEvent();
             result.Action = action ?? throw new ArgumentNullException(nameof(action));
             return result;
         }

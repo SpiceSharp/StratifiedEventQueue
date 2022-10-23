@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States;
 
@@ -10,8 +11,8 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the variable.</typeparam>
     public class VariableUpdateEvent<T> : Event
     {
-        private static readonly System.Collections.Generic.Queue<VariableUpdateEvent<T>> _pool
-            = new System.Collections.Generic.Queue<VariableUpdateEvent<T>>();
+        private static readonly ConcurrentQueue<VariableUpdateEvent<T>> _pool
+            = new ConcurrentQueue<VariableUpdateEvent<T>>();
 
         /// <summary>
         /// Gets the variable that needs to be assigned.
@@ -47,10 +48,11 @@ namespace StratifiedEventQueue.Events
         /// <returns></returns>
         public static VariableUpdateEvent<T> Create(Variable<T> variable, T value)
         {
-            VariableUpdateEvent<T> @event = _pool.Count > 0 ? _pool.Dequeue() : new VariableUpdateEvent<T>();
-            @event.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
-            @event.Value = value;
-            return @event;
+            if (!_pool.TryDequeue(out var result))
+                result = new VariableUpdateEvent<T>();
+            result.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
+            result.Value = value;
+            return result;
         }
     }
 }

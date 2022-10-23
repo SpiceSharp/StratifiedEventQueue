@@ -1,7 +1,7 @@
 ﻿using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace StratifiedEventQueue.Events
 {
@@ -12,8 +12,7 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the variable.</typeparam>
     public class DeferredAssignmentEvent<T> : Event
     {
-        private static readonly System.Collections.Generic.Queue<DeferredAssignmentEvent<T>> _pool 
-            = new System.Collections.Generic.Queue<DeferredAssignmentEvent<T>>();
+        private static readonly ConcurrentQueue<DeferredAssignmentEvent<T>> _pool = new ConcurrentQueue<DeferredAssignmentEvent<T>>();
 
         /// <summary>
         /// Gets the variable that needs to be assigned.
@@ -51,7 +50,8 @@ namespace StratifiedEventQueue.Events
         /// <exception cref="ArgumentNullException">Thrown if any parameter is <c>null</c>.</exception>
         public static DeferredAssignmentEvent<T> Create(Variable<T> variable, Func<T> function)
         {
-            DeferredAssignmentEvent<T> result = _pool.Count > 0 ? _pool.Dequeue() : new DeferredAssignmentEvent<T>();
+            if (!_pool.TryDequeue(out var result))
+                result = new DeferredAssignmentEvent<T>();
             result.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             result.Func = function ?? throw new ArgumentNullException(nameof(function));
             return result;

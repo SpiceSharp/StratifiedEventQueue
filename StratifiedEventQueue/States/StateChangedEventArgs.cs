@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using StratifiedEventQueue.Simulation;
 
 namespace StratifiedEventQueue.States
@@ -8,8 +9,8 @@ namespace StratifiedEventQueue.States
     /// </summary>
     public class StateChangedEventArgs<T> : EventArgs
     {
-        private static readonly System.Collections.Generic.Queue<StateChangedEventArgs<T>> _pool 
-            = new System.Collections.Generic.Queue<StateChangedEventArgs<T>>();
+        private static readonly ConcurrentQueue<StateChangedEventArgs<T>> _pool 
+            = new ConcurrentQueue<StateChangedEventArgs<T>>();
 
         /// <summary>
         /// Gets the scheduler the variable is associated with.
@@ -54,7 +55,9 @@ namespace StratifiedEventQueue.States
         /// <returns>The event arguments.</returns>
         public static StateChangedEventArgs<T> Create(IScheduler scheduler, IState<T> state, T oldValue)
         {
-            StateChangedEventArgs<T> result = _pool.Count > 0 ? _pool.Dequeue() : new StateChangedEventArgs<T>();
+            _pool.TryDequeue(out var result);
+            if (result == null)
+                result = new StateChangedEventArgs<T>();
             result.State = state;
             result.Scheduler = scheduler;
             result.OldValue = oldValue;

@@ -82,6 +82,7 @@ namespace StratifiedEventQueue.States.Gates
             FallDelay = fallDelay;
             TurnOffDelay = turnOffDelay;
             UnknownDelay = Math.Min(RiseDelay, Math.Min(fallDelay, turnOffDelay));
+            _event = new AssignmentEvent(this);
         }
 
         /// <summary>
@@ -111,6 +112,7 @@ namespace StratifiedEventQueue.States.Gates
                 // Already equal
                 return;
             }
+            var oldSignal = result.Logic;
 
             ulong delay;
             switch (result.Logic)
@@ -130,7 +132,22 @@ namespace StratifiedEventQueue.States.Gates
             _event.Value = result;
             _nextEvent = args.Scheduler.ScheduleInactive(delay, _event);
             _nextEventTime = nextTime;
+
+            // Deal with the resulting logic level
+            if (oldSignal != Value.Logic)
+            {
+                var nargs = StateChangedEventArgs<Signal>.Create(args.Scheduler, this, oldSignal);
+                OnChanged(nargs);
+                nargs.Release();
+            }
         }
+
+        /// <summary>
+        /// Called when the signal changed.
+        /// </summary>
+        /// <param name="args">The argument.</param>
+        protected virtual void OnChanged(StateChangedEventArgs<Signal> args)
+            => SignalChanged?.Invoke(this, args);
 
         /// <summary>
         /// Computes a signal.

@@ -1,6 +1,7 @@
 ﻿using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,15 +13,9 @@ namespace StratifiedEventQueue.Events
     /// <typeparam name="T">The value type of the waveform.</typeparam>
     public class WaveformEvent<T> : Event
     {
-        private static readonly System.Collections.Generic.Queue<WaveformEvent<T>> _pool 
-            = new System.Collections.Generic.Queue<WaveformEvent<T>>(InitialPoolSize);
+        private static readonly ConcurrentQueue<WaveformEvent<T>> _pool = new ConcurrentQueue<WaveformEvent<T>>();
         private IEnumerator<KeyValuePair<ulong, T>> _enumerator;
         private bool _isFirst;
-
-        /// <summary>
-        /// The initial event pool size.
-        /// </summary>
-        public const int InitialPoolSize = 20;
 
         /// <summary>
         /// Gets the variable to be set.
@@ -66,10 +61,7 @@ namespace StratifiedEventQueue.Events
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="variable"/> or <paramref name="points"/> is <c>null</c>.</exception>
         public static WaveformEvent<T> Create(Variable<T> variable, IEnumerable<KeyValuePair<ulong, T>> points)
         {
-            WaveformEvent<T> result;
-            if (_pool.Count > 0)
-                result = _pool.Dequeue();
-            else
+            if (!_pool.TryDequeue(out var result))
                 result = new WaveformEvent<T>();
             result.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             result._enumerator = points?.GetEnumerator() ?? throw new ArgumentNullException(nameof(points)); ;
@@ -87,10 +79,7 @@ namespace StratifiedEventQueue.Events
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="variable"/> or <paramref name="values" /> is <c>ull</c>.</exception>
         public static WaveformEvent<T> Create(Variable<T> variable, ulong period, IEnumerable<T> values)
         {
-            WaveformEvent<T> result;
-            if (_pool.Count > 0)
-                result = _pool.Dequeue();
-            else
+            if (!_pool.TryDequeue(out var result))
                 result = new WaveformEvent<T>();
             result.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             result._enumerator = values?.Select((v, index) =>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 
 namespace StratifiedEventQueue.Simulation
 {
@@ -7,13 +8,7 @@ namespace StratifiedEventQueue.Simulation
     /// </summary>
     public class EventQueue
     {
-        private static readonly System.Collections.Generic.Queue<EventQueue> _pool
-            = new System.Collections.Generic.Queue<EventQueue>(InitialPoolSize);
-
-        /// <summary>
-        /// The initial pool size.
-        /// </summary>
-        public const int InitialPoolSize = 20;
+        private static readonly ConcurrentQueue<EventQueue> _pool = new ConcurrentQueue<EventQueue>();
 
         /// <summary>
         /// All inactive events that will be activated once all active events have finished.
@@ -72,6 +67,10 @@ namespace StratifiedEventQueue.Simulation
         /// </summary>
         /// <returns>The event queue.</returns>
         public static EventQueue Create()
-            => _pool.Count > 0 ? _pool.Dequeue() : new EventQueue();
+        {
+            if (!_pool.TryDequeue(out var result))
+                result = new EventQueue();
+            return result;
+        }
     }
 }
