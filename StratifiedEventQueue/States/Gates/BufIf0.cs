@@ -71,7 +71,7 @@ namespace StratifiedEventQueue.States.Gates
                     }
 
                 case Signal.H:
-                    return new DriveStrengthRange(Strength.HiZ0, Strength.HiZ1);
+                    return new DriveStrengthRange(Strength.None, Strength.None);
 
                 default:
                     switch (Data.Value)

@@ -63,7 +63,7 @@ namespace StratifiedEventQueue.States.Gates
             switch (Control.Value)
             {
                 case Signal.L:
-                    return new DriveStrengthRange(Strength.HiZ0, Strength.HiZ1);
+                    return new DriveStrengthRange(Strength.None, Strength.None);
 
                 case Signal.H:
                     switch (Data.Value)
