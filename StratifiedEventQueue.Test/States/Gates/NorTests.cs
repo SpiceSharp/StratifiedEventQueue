@@ -1,11 +1,11 @@
 ﻿using StratifiedEventQueue.Events;
 using StratifiedEventQueue.Simulation;
-using StratifiedEventQueue.States;
 using StratifiedEventQueue.States.Gates;
+using StratifiedEventQueue.States;
 
 namespace StratifiedEventQueue.Test.States.Gates
 {
-    public class AndTests
+    public class NorTests
     {
         [Fact]
         public void When_RegularInputs_Expect_Reference()
@@ -21,11 +21,11 @@ namespace StratifiedEventQueue.Test.States.Gates
             scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(b, 10, "00110011".ToLogic()));
 
             // Add the AND gate
-            var q = new And("and1", "q", a, b);
+            var q = new Nor("nor1", "q", a, b);
 
             int index = 0;
-            var expectedChanges = new ulong[] { 20, 30, 60, 70 };
-            Signal expectedResult = Signal.H;
+            var expectedChanges = new ulong[] { 10, 40, 50 };
+            Signal expectedResult = Signal.L;
             q.Changed += (sender, args) => {
                 Assert.Equal(expectedChanges[index], scheduler.CurrentTime);
                 Assert.Equal(expectedResult, args.State.Value);

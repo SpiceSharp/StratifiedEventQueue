@@ -5,7 +5,7 @@ using StratifiedEventQueue.States.Gates;
 
 namespace StratifiedEventQueue.Test.States.Gates
 {
-    public class AndTests
+    public class XorTests
     {
         [Fact]
         public void When_RegularInputs_Expect_Reference()
@@ -20,11 +20,11 @@ namespace StratifiedEventQueue.Test.States.Gates
             scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(a, 10, "01100110".ToLogic()));
             scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(b, 10, "00110011".ToLogic()));
 
-            // Add the AND gate
-            var q = new And("and1", "q", a, b);
+            // Add the Xor gate
+            var q = new Xor("xor1", "q", a, b);
 
             int index = 0;
-            var expectedChanges = new ulong[] { 20, 30, 60, 70 };
+            var expectedChanges = new ulong[] { 10, 20, 30, 40, 50, 60, 70 };
             Signal expectedResult = Signal.H;
             q.Changed += (sender, args) => {
                 Assert.Equal(expectedChanges[index], scheduler.CurrentTime);

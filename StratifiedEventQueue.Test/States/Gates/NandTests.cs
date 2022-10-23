@@ -5,7 +5,7 @@ using StratifiedEventQueue.States.Gates;
 
 namespace StratifiedEventQueue.Test.States.Gates
 {
-    public class AndTests
+    public class NandTests
     {
         [Fact]
         public void When_RegularInputs_Expect_Reference()
@@ -20,12 +20,12 @@ namespace StratifiedEventQueue.Test.States.Gates
             scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(a, 10, "01100110".ToLogic()));
             scheduler.ScheduleInactive(0, WaveformEvent<Signal>.Create(b, 10, "00110011".ToLogic()));
 
-            // Add the AND gate
-            var q = new And("and1", "q", a, b);
+            // Add the Nand gate
+            var q = new Nand("nand1", "q", a, b);
 
             int index = 0;
             var expectedChanges = new ulong[] { 20, 30, 60, 70 };
-            Signal expectedResult = Signal.H;
+            Signal expectedResult = Signal.L;
             q.Changed += (sender, args) => {
                 Assert.Equal(expectedChanges[index], scheduler.CurrentTime);
                 Assert.Equal(expectedResult, args.State.Value);
