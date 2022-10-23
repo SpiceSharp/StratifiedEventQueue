@@ -48,5 +48,11 @@ namespace StratifiedEventQueue.States.Gates
         /// <inheritdoc />
         protected override Signal ComputeSignal()
             => LogicHelper.Nor(A.Value, B.Value);
+
+        /// <summary>
+        /// Converts the gate to a string.
+        /// </summary>
+        /// <returns>The string.</returns>
+        public override string ToString() => $"nor {Name}";
     }
 }
