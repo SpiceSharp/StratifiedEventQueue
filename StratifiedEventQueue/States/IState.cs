@@ -10,11 +10,6 @@ namespace StratifiedEventQueue.States
     public interface IState<T>
     {
         /// <summary>
-        /// Gets the comparer used by the variable.
-        /// </summary>
-        IEqualityComparer<T> Comparer { get; }
-
-        /// <summary>
         /// Occurs when the value of the state changes.
         /// </summary>
         event EventHandler<StateChangedEventArgs<T>> Changed;

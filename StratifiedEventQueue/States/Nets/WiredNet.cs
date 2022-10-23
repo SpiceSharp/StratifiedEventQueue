@@ -1,6 +1,5 @@
 ﻿using StratifiedEventQueue.Simulation;
 using System;
-using System.Collections.Generic;
 
 namespace StratifiedEventQueue.States.Nets
 {
@@ -8,7 +7,7 @@ namespace StratifiedEventQueue.States.Nets
     /// A net represents wired logic, which can come from multiple drivers.
     /// </summary>
     /// <typeparam name="T">The result type.</typeparam>
-    public abstract class WiredNet : InvariantNet<DriveStrengthRange>, IState<Signal>
+    public abstract class WiredNet : Combiner<DriveStrengthRange, DriveStrengthRange>, IState<Signal>
     {
         private Signal _signal;
         private event EventHandler<StateChangedEventArgs<Signal>> SignalChanged;
@@ -23,15 +22,12 @@ namespace StratifiedEventQueue.States.Nets
             remove { SignalChanged -= value; }
         }
 
-        /// <inheritdoc />
-        IEqualityComparer<Signal> IState<Signal>.Comparer => EqualityComparer<Signal>.Default;
-
         /// <summary>
         /// Creates a new <see cref="WiredNet"/>.
         /// </summary>
         /// <param name="name">The name of the net.</param>
         protected WiredNet(string name)
-            : base(name, default, EqualityComparer<DriveStrengthRange>.Default)
+            : base(name)
         {
         }
 

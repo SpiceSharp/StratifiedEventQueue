@@ -14,10 +14,9 @@ namespace StratifiedEventQueue.States
         /// Creates a new <see cref="Variable{T}"/>.
         /// </summary>
         /// <param name="name">The name of the variable.</param>
-        /// <param name="initialValue">The initial value.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/> is <c>null</c>.</exception>
-        public Variable(string name, T initialValue = default, IEqualityComparer<T> comparer = null)
-            : base(name, initialValue, comparer)
+        public Variable(string name, IEqualityComparer<T> comparer = null)
+            : base(name, comparer)
         {
         }
 

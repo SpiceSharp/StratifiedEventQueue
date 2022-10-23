@@ -1,27 +1,26 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using StratifiedEventQueue.States.Nets;
 
-namespace StratifiedEventQueue.States.Nets
+namespace StratifiedEventQueue.States
 {
     /// <summary>
     /// Represents a generic net that can take multiple drivers and resolve them.
     /// </summary>
-    /// <typeparam name="R">The driver type.</typeparam>
     /// <typeparam name="T">The result type.</typeparam>
-    public abstract class InvariantNet<T> : State<T>
+    public abstract class Combiner<TIn, TOut> : State<TOut>
     {
-        private T _result;
-        private readonly Drivers _drivers = new Drivers();
+        private readonly Inputs _inputs = new Inputs();
 
         /// <summary>
         /// A class that is used to provide access to the underlying drivers of the net.
         /// </summary>
-        protected class Drivers : IReadOnlyList<T>
+        protected class Inputs : IReadOnlyList<TIn>
         {
-            private readonly List<IState<T>> _drivers = new List<IState<T>>();
+            private readonly List<IState<TIn>> _drivers = new List<IState<TIn>>();
 
             /// <inheritdoc />
-            public T this[int index] => _drivers[index].Value;
+            public TIn this[int index] => _drivers[index].Value;
 
             /// <inheritdoc />
             public int Count => _drivers.Count;
@@ -30,11 +29,11 @@ namespace StratifiedEventQueue.States.Nets
             /// Add the state.
             /// </summary>
             /// <param name="driver">The driver.</param>
-            public void Add(IState<T> driver)
+            public void Add(IState<TIn> driver)
                 => _drivers.Add(driver);
 
             /// <inheritdoc />
-            public IEnumerator<T> GetEnumerator()
+            public IEnumerator<TIn> GetEnumerator()
             {
                 foreach (var driver in _drivers)
                     yield return driver.Value;
@@ -50,18 +49,19 @@ namespace StratifiedEventQueue.States.Nets
         /// <param name="name">The name of the net.</param>
         /// <param name="initialValue">The initial value.</param>
         /// <param name="comparer">The comparer.</param>
-        protected InvariantNet(string name, T initialValue = default, IEqualityComparer<T> comparer = null)
-            : base(name, initialValue, comparer)
+        protected Combiner(string name, IEqualityComparer<TOut> comparer = null)
+            : base(name, comparer)
         {
+            Value = default;
         }
 
         /// <summary>
         /// Registers a driver to the net.
         /// </summary>
         /// <param name="driver">The driver.</param>
-        public void RegisterDriver(IState<T> driver)
+        public void RegisterDriver(IState<TIn> driver)
         {
-            _drivers.Add(driver);
+            _inputs.Add(driver);
             driver.Changed += Update;
         }
 
@@ -70,9 +70,9 @@ namespace StratifiedEventQueue.States.Nets
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="args">The argument.</param>
-        protected void Update(object sender, StateChangedEventArgs<T> args)
+        protected void Update(object sender, StateChangedEventArgs<TIn> args)
         {
-            var result = Combine(_drivers);
+            var result = Combine(_inputs);
             Change(args.Scheduler, result);
         }
 
@@ -81,6 +81,6 @@ namespace StratifiedEventQueue.States.Nets
         /// </summary>
         /// <param name="drivers">The drivers.</param>
         /// <returns>The result.</returns>
-        protected abstract T Combine(IReadOnlyList<T> drivers);
+        protected abstract TOut Combine(IReadOnlyList<TIn> drivers);
     }
 }

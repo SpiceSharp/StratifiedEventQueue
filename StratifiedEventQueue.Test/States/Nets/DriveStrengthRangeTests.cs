@@ -3,7 +3,7 @@ using StratifiedEventQueue.States.Nets;
 
 namespace StratifiedEventQueue.Test.States.Nets
 {
-    public class DriveStrengthTests
+    public class DriveStrengthRangeTests
     {
         [Theory]
         [MemberData(nameof(Tests))]
@@ -30,6 +30,7 @@ namespace StratifiedEventQueue.Test.States.Nets
         [MemberData(nameof(ReduceTests))]
         public void When_Reduce_Expect_Reference(Strength a, Strength expected)
         {
+            // Emulates resistive devices
             Assert.Equal(expected, DriveStrengthRange.Reduce(a));
         }
 

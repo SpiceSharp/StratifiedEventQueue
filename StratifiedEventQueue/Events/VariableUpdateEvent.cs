@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States;
 
@@ -9,10 +8,10 @@ namespace StratifiedEventQueue.Events
     /// An event that describes an assignment to a variable when executed.
     /// </summary>
     /// <typeparam name="T">The value type of the variable.</typeparam>
-    public class AssignmentEvent<T> : Event
+    public class VariableUpdateEvent<T> : Event
     {
-        private static readonly System.Collections.Generic.Queue<AssignmentEvent<T>> _pool
-            = new System.Collections.Generic.Queue<AssignmentEvent<T>>();
+        private static readonly System.Collections.Generic.Queue<VariableUpdateEvent<T>> _pool
+            = new System.Collections.Generic.Queue<VariableUpdateEvent<T>>();
 
         /// <summary>
         /// Gets the variable that needs to be assigned.
@@ -25,9 +24,9 @@ namespace StratifiedEventQueue.Events
         public T Value { get; private set; }
 
         /// <summary>
-        /// Creates a new <see cref="AssignmentEvent{T}"/>.
+        /// Creates a new <see cref="VariableUpdateEvent{T}"/>.
         /// </summary>
-        private AssignmentEvent()
+        private VariableUpdateEvent()
         {
         }
 
@@ -41,14 +40,14 @@ namespace StratifiedEventQueue.Events
         }
 
         /// <summary>
-        /// Creates a new <see cref="AssignmentEvent{T}"/>, but uses a pool of objects.
+        /// Creates a new <see cref="VariableUpdateEvent{T}"/>, but uses a pool of objects.
         /// </summary>
         /// <param name="variable"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static AssignmentEvent<T> Create(Variable<T> variable, T value)
+        public static VariableUpdateEvent<T> Create(Variable<T> variable, T value)
         {
-            AssignmentEvent<T> @event = _pool.Count > 0 ? _pool.Dequeue() : new AssignmentEvent<T>();
+            VariableUpdateEvent<T> @event = _pool.Count > 0 ? _pool.Dequeue() : new VariableUpdateEvent<T>();
             @event.Variable = variable ?? throw new ArgumentNullException(nameof(variable));
             @event.Value = value;
             return @event;
