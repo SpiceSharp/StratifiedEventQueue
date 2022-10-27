@@ -11,7 +11,7 @@ namespace StratifiedEventQueue.States.Gates
     {
         private EventNode _nextEvent = null;
         private ulong _nextEventTime = 0;
-        private readonly AssignmentEvent _event;
+        private readonly UpdateEvent _event;
 
         /// <summary>
         /// Gets the name of the gate.
@@ -28,18 +28,16 @@ namespace StratifiedEventQueue.States.Gates
         /// </summary>
         public uint FallDelay { get; }
 
-        protected class AssignmentEvent : Event
+        protected class UpdateEvent : Event
         {
             private readonly Gate _parent;
             public Signal Value { get; set; }
-            public AssignmentEvent(Gate parent)
+            public UpdateEvent(Gate parent)
             {
                 _parent = parent;
             }
-            public override void Execute(IScheduler scheduler)
-            {
-                _parent.Change(scheduler, Value);
-            }
+            /// <inheritdoc />
+            public override void Execute(IScheduler scheduler) => _parent.Update(scheduler, Value);
         }
 
         /// <summary>
@@ -54,7 +52,7 @@ namespace StratifiedEventQueue.States.Gates
             : base(outputName)
         {
             GateName = gateName ?? throw new ArgumentNullException(nameof(gateName));
-            _event = new AssignmentEvent(this);
+            _event = new UpdateEvent(this);
             RiseDelay = riseDelay;
             FallDelay = fallDelay;
         }
@@ -70,7 +68,7 @@ namespace StratifiedEventQueue.States.Gates
             if (result == Value)
                 return;
             else
-                Change(args.Scheduler, result);
+                Update(args.Scheduler, result);
         }
 
         /// <summary>
@@ -88,7 +86,7 @@ namespace StratifiedEventQueue.States.Gates
             }
 
             // Compute the delay of the gate
-            ulong delay;
+            uint delay;
             switch (result)
             {
                 case Signal.L: delay = FallDelay; break;
@@ -102,9 +100,16 @@ namespace StratifiedEventQueue.States.Gates
                 _nextEvent.Deschedule();
 
             // Schedule the next event
-            _event.Value = result;
-            _nextEvent = args.Scheduler.ScheduleInactive(delay, _event);
-            _nextEventTime = nextTime;
+            if (result != Value)
+            {
+                _event.Value = result;
+                _nextEvent = args.Scheduler.ScheduleInactive(delay, _event);
+                _nextEventTime = nextTime;
+            }
+            else
+            {
+                _nextEvent = null;
+            }
         }
 
         /// <summary>

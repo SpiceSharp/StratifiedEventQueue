@@ -17,17 +17,7 @@ namespace StratifiedEventQueue.States.Nets
         }
 
         /// <inheritdoc />
-        protected override DriveStrengthRange Combine(IReadOnlyList<DriveStrengthRange> inputs)
-        {
-            if (inputs.Count == 0)
-                return default;
-
-            // Compute the combined result using wire logic
-            var result = inputs[0];
-            for (int i = 1; i < inputs.Count; i++)
-                result = DriveStrengthRange.WiredOr(result, inputs[i]);
-            return result;
-        }
+        protected override DriveStrengthRange Combine(DriveStrengthRange a, DriveStrengthRange b) => DriveStrengthRange.WiredOr(a, b);
 
         /// <summary>
         /// Converts the wire to a string.

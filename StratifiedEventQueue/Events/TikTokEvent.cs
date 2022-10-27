@@ -5,7 +5,7 @@ using System;
 namespace StratifiedEventQueue.Events
 {
     /// <summary>
-    /// An event that keeps bouncing between tik and tok events.
+    /// An event that keeps bouncing between tik and tok events (useful for a clock for example).
     /// </summary>
     /// <typeparam name="T">The value type.</typeparam>
     public class TikTokEvent<T> : Event

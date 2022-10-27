@@ -14,6 +14,7 @@ namespace StratifiedEventQueue.States.Gates
         private ulong _nextEventTime = 0;
         private readonly AssignmentEvent _event;
         private event EventHandler<StateChangedEventArgs<Signal>> SignalChanged;
+        private Signal _signal;
 
         /// <inheritdoc />
         event EventHandler<StateChangedEventArgs<Signal>> IState<Signal>.Changed
@@ -58,9 +59,20 @@ namespace StratifiedEventQueue.States.Gates
             {
                 _parent = parent;
             }
+            /// <inheritdoc />
             public override void Execute(IScheduler scheduler)
             {
-                _parent.Change(scheduler, Value);
+                _parent.Update(scheduler, Value);
+
+                // Deal with the signal
+                var signal = Value.Logic;
+                if (_parent._signal != signal)
+                {
+                    var args = StateChangedEventArgs<Signal>.Create(scheduler, _parent, _parent._signal);
+                    _parent._signal = signal;
+                    _parent.OnChanged(args);
+                    args.Release();
+                }
             }
         }
 
@@ -96,7 +108,7 @@ namespace StratifiedEventQueue.States.Gates
             if (result == Value)
                 return;
             else
-                Change(args.Scheduler, result);
+                Update(args.Scheduler, result);
         }
 
         /// <summary>
@@ -112,15 +124,26 @@ namespace StratifiedEventQueue.States.Gates
                 // Already equal
                 return;
             }
-            var oldSignal = result.Logic;
+            var logic = result.Logic;
 
             ulong delay;
-            switch (result.Logic)
+            switch (logic)
             {
-                case Signal.L: delay = FallDelay; break;
-                case Signal.H: delay = RiseDelay; break;
-                case Signal.Z: delay = TurnOffDelay; break;
-                default: delay = UnknownDelay; break;
+                case Signal.L:
+                    delay = FallDelay;
+                    break;
+
+                case Signal.H:
+                    delay = RiseDelay;
+                    break;
+
+                case Signal.Z:
+                    delay = TurnOffDelay;
+                    break;
+
+                default:
+                    delay = UnknownDelay;
+                    break;
             }
             ulong nextTime = args.Scheduler.CurrentTime + delay;
 
@@ -129,16 +152,15 @@ namespace StratifiedEventQueue.States.Gates
                 _nextEvent.Deschedule();
 
             // Schedule the next event
-            _event.Value = result;
-            _nextEvent = args.Scheduler.ScheduleInactive(delay, _event);
-            _nextEventTime = nextTime;
-
-            // Deal with the resulting logic level
-            if (oldSignal != Value.Logic)
+            if (result != Value)
             {
-                var nargs = StateChangedEventArgs<Signal>.Create(args.Scheduler, this, oldSignal);
-                OnChanged(nargs);
-                nargs.Release();
+                _event.Value = result;
+                _nextEvent = args.Scheduler.ScheduleInactive(delay, _event);
+                _nextEventTime = nextTime;
+            }
+            else
+            {
+                _nextEvent = null;
             }
         }
 

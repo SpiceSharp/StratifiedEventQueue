@@ -22,7 +22,7 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="fallDelay">The delay for low states.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/>, <paramref name="outputName"/> or <paramref name="input"/> is <c>null</c>.</exception>
         public Buf(string name, string outputName, IState<Signal> input,
-            ulong riseDelay = 0, ulong fallDelay = 0)
+            uint riseDelay = 0, uint fallDelay = 0)
             : base(name, outputName, riseDelay, fallDelay)
         {
             Input = input ?? throw new ArgumentNullException(nameof(input));

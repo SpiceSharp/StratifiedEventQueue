@@ -38,7 +38,7 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="fallDelay">The fall delay.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="data"/>, <paramref name="control"/>, <paramref name="name"/> or <paramref name="outputName"/> is <c>null</c>.</exception>
         public BufIf1(string name, string outputName, IState<Signal> data, IState<Signal> control,
-            ulong riseDelay = 0, ulong fallDelay = 0, Strength low = Strength.St0, Strength high = Strength.St1)
+            uint riseDelay = 0, uint fallDelay = 0, Strength low = Strength.St0, Strength high = Strength.St1)
             : base(name, outputName, riseDelay, fallDelay, riseDelay)
         {
             Data = data ?? throw new ArgumentNullException(nameof(data));

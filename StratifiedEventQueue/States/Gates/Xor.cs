@@ -27,12 +27,12 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="fallDelay">The fall delay.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="a"/>, <paramref name="b"/>, <paramref name="name"/> or <paramref name="outputName"/> is <c>null</c>.</exception>
         public Xor(string name, string outputName, IState<Signal> a, IState<Signal> b,
-            ulong riseDelay = 0, ulong fallDelay = 0)
+            uint riseDelay = 0, uint fallDelay = 0)
             : base(name, outputName, riseDelay, fallDelay)
         {
             A = a ?? throw new ArgumentNullException(nameof(a));
             B = b ?? throw new ArgumentNullException(nameof(b));
-            Value = ComputeSignal();
+            Update(ComputeSignal());
             if (riseDelay == 0 && fallDelay == 0)
             {
                 A.Changed += UpdateZeroDelay;
