@@ -93,6 +93,12 @@ namespace StratifiedEventQueue.States.Nets
         {
             _drivers.Add(driver ?? throw new ArgumentNullException(nameof(driver)));
             Update(this, null);
+
+            // Add listener
+            if (RiseDelay == 0 && FallDelay == 0 && TurnOffDelay == 0)
+                driver.Changed += UpdateZeroDelay;
+            else
+                driver.Changed += Update;
         }
 
         /// <summary>
@@ -106,6 +112,10 @@ namespace StratifiedEventQueue.States.Nets
             {
                 // The value might have changed
                 Update(this, null);
+                if (RiseDelay == 0 && FallDelay == 0 && TurnOffDelay == 0)
+                    driver.Changed -= UpdateZeroDelay;
+                else
+                    driver.Changed -= Update;
             }
         }
 
