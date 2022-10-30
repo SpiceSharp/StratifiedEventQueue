@@ -34,22 +34,17 @@ namespace StratifiedEventQueue.States.Gates
         /// <summary>
         /// Gets the delay for rising signals.
         /// </summary>
-        public uint RiseDelay { get; }
+        public Func<uint> RiseDelay { get; }
 
         /// <summary>
         /// Gets the delay for falling signals.
         /// </summary>
-        public uint FallDelay { get; }
+        public Func<uint> FallDelay { get; }
 
         /// <summary>
         /// Gets the delay for turning off.
         /// </summary>
-        public uint TurnOffDelay { get; }
-
-        /// <summary>
-        /// Gets the delay for unknown transitions.
-        /// </summary>
-        public uint UnknownDelay { get; }
+        public Func<uint> TurnOffDelay { get; }
 
         protected class AssignmentEvent : Event
         {
@@ -86,14 +81,13 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="turnOffDelay">The delay for signals turning off.</param>
         /// <exception cref="ArgumentNullException">Thrown if any argument is <c>null</c>.</exception>
         public TriGate(string gateName, string outputName,
-            uint riseDelay, uint fallDelay, uint turnOffDelay)
+            Func<uint> riseDelay, Func<uint> fallDelay, Func<uint> turnOffDelay)
             : base(outputName)
         {
             GateName = gateName ?? throw new ArgumentNullException(nameof(gateName));
             RiseDelay = riseDelay;
             FallDelay = fallDelay;
             TurnOffDelay = turnOffDelay;
-            UnknownDelay = Math.Min(RiseDelay, Math.Min(fallDelay, turnOffDelay));
             _event = new AssignmentEvent(this);
         }
 
@@ -130,19 +124,22 @@ namespace StratifiedEventQueue.States.Gates
             switch (logic)
             {
                 case Signal.L:
-                    delay = FallDelay;
+                    delay = FallDelay();
                     break;
 
                 case Signal.H:
-                    delay = RiseDelay;
+                    delay = RiseDelay();
                     break;
 
                 case Signal.Z:
-                    delay = TurnOffDelay;
+                    delay = TurnOffDelay();
                     break;
 
                 default:
-                    delay = UnknownDelay;
+                    uint fallDelay = FallDelay();
+                    uint riseDelay = RiseDelay();
+                    uint turnOffDelay = TurnOffDelay();
+                    delay = Math.Min(fallDelay, Math.Min(riseDelay, turnOffDelay));
                     break;
             }
             ulong nextTime = args.Scheduler.CurrentTime + delay;

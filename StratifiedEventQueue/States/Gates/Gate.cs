@@ -21,12 +21,12 @@ namespace StratifiedEventQueue.States.Gates
         /// <summary>
         /// Gets the delay for rising signals.
         /// </summary>
-        public uint RiseDelay { get; }
+        public Func<uint> RiseDelay { get; }
 
         /// <summary>
         /// Gets the delay for falling signals.
         /// </summary>
-        public uint FallDelay { get; }
+        public Func<uint> FallDelay { get; }
 
         protected class UpdateEvent : Event
         {
@@ -48,7 +48,7 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="fallDelay">The delay for signals going to the low state.</param>
         /// <param name="riseDelay">The delay for signals going to the high state.</param>
         /// <exception cref="ArgumentNullException">Thrown if any argument is <c>null</c>.</exception>
-        public Gate(string gateName, string outputName, uint riseDelay, uint fallDelay)
+        public Gate(string gateName, string outputName, Func<uint> riseDelay, Func<uint> fallDelay)
             : base(outputName)
         {
             GateName = gateName ?? throw new ArgumentNullException(nameof(gateName));
@@ -89,9 +89,9 @@ namespace StratifiedEventQueue.States.Gates
             uint delay;
             switch (result)
             {
-                case Signal.L: delay = FallDelay; break;
-                case Signal.H: delay = RiseDelay; break;
-                default: delay = FallDelay < RiseDelay ? FallDelay : RiseDelay; break;
+                case Signal.L: delay = FallDelay(); break;
+                case Signal.H: delay = RiseDelay(); break;
+                default: delay = Math.Min(FallDelay(), RiseDelay()); break;
             }
             ulong nextTime = args.Scheduler.CurrentTime + delay;
 

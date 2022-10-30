@@ -22,11 +22,11 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="fallDelay">The delay for low states.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="name"/>, <paramref name="outputName"/> or <paramref name="input"/> is <c>null</c>.</exception>
         public Not(string name, string outputName, IState<Signal> input,
-            uint riseDelay = 0, uint fallDelay = 0)
+            Func<uint> riseDelay = null, Func<uint> fallDelay = null)
             : base(name, outputName, riseDelay, fallDelay)
         {
             Input = input ?? throw new ArgumentNullException(nameof(input));
-            if (riseDelay == 0 && fallDelay == 0)
+            if (riseDelay == null && fallDelay == null)
                 input.Changed += UpdateZeroDelay;
             else
                 input.Changed += Update;

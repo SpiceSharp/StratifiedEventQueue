@@ -301,5 +301,41 @@ namespace StratifiedEventQueue.States
             }
             return result;
         }
+
+        /// <summary>
+        /// Checks whether a transition is a posedge.
+        /// </summary>
+        /// <remarks>
+        /// According to Verilog standard.
+        /// </remarks>
+        /// <param name="oldValue">The old value.</param>
+        /// <param name="newValue">The new value.</param>
+        /// <returns>Returns <c>true</c> on a positive edge; otherwise, <c>false</c>.</returns>
+        public static bool PosEdge(Signal oldValue, Signal newValue)
+        {
+            if (oldValue == Signal.H)
+                return newValue != Signal.H;
+            if (oldValue == Signal.X || oldValue == Signal.Z)
+                return newValue == Signal.L;
+            return false;
+        }
+
+        /// <summary>
+        /// Checks whether a transition is a negedge.
+        /// </summary>
+        /// <remarks>
+        /// According to Verilog standard.
+        /// </remarks>
+        /// <param name="oldValue">The old value.</param>
+        /// <param name="newValue">The new value.</param>
+        /// <returns>Returns <c>true</c> on a negative edge; otherwise, <c>false</c>.</returns>
+        public static bool NegEdge(Signal oldValue, Signal newValue)
+        {
+            if (oldValue == Signal.L)
+                return newValue != Signal.L;
+            if (oldValue == Signal.X || oldValue == Signal.Z)
+                return newValue == Signal.H;
+            return false;
+        }
     }
 }

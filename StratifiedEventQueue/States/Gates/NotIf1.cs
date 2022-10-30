@@ -38,7 +38,7 @@ namespace StratifiedEventQueue.States.Gates
         /// <param name="fallDelay">The fall delay.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="data"/>, <paramref name="control"/>, <paramref name="name"/> or <paramref name="outputName"/> is <c>null</c>.</exception>
         public NotIf1(string name, string outputName, IState<Signal> data, IState<Signal> control,
-            uint riseDelay = 0, uint fallDelay = 0,
+            Func<uint> riseDelay = null, Func<uint> fallDelay = null,
             Strength low = Strength.St0, Strength high = Strength.St1)
             : base(name, outputName, riseDelay, fallDelay, riseDelay)
         {
@@ -46,7 +46,7 @@ namespace StratifiedEventQueue.States.Gates
             Control = control ?? throw new ArgumentNullException(nameof(control));
             Low = low;
             High = high;
-            if (riseDelay == 0 && fallDelay == 0)
+            if (riseDelay == null && fallDelay == null)
             {
                 Data.Changed += UpdateZeroDelay;
                 Control.Changed += UpdateZeroDelay;
