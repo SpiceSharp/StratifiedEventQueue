@@ -31,12 +31,18 @@ namespace StratifiedEventQueue.Procedures
         }
 
         /// <summary>
+        /// Gets the delay.
+        /// </summary>
+        public Func<uint> Delay { get; }
+
+        /// <summary>
         /// Creates a new <see cref="ProceduralDelay"/>.
         /// </summary>
         /// <param name="delay">The delay.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="delay"/> is <c>null</c>.</exception>
         public ProceduralDelay(Func<uint> delay)
         {
+            Delay = delay ?? throw new ArgumentNullException(nameof(delay));
             _event = new FinishEvent(this);
         }
 

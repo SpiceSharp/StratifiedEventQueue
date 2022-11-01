@@ -14,11 +14,6 @@ namespace StratifiedEventQueue.Procedures
         public event EventHandler<ProceduralStatementEventArgs> Executed;
 
         /// <summary>
-        /// Gets the delay.
-        /// </summary>
-        public Func<uint> Delay { get; }
-
-        /// <summary>
         /// Triggers the procedural statement on a procedural statement event (sequence).
         /// </summary>
         /// <param name="sender">The sender.</param>
