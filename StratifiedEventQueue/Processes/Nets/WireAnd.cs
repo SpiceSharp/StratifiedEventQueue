@@ -5,7 +5,7 @@ namespace StratifiedEventQueue.States.Nets
     /// <summary>
     /// A wand or triand that performs AND logic in case of conflicting drivers.
     /// </summary>
-    public class WireAnd : WiredNet
+    public class WireAnd : Net
     {
         /// <summary>
         /// Creates a new <see cref="WireAnd"/>.

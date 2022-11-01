@@ -1,6 +1,5 @@
 ﻿using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States.Nets;
-using StratifiedEventQueue.States;
 
 namespace StratifiedEventQueue.Test.States.Nets
 {
@@ -10,19 +9,22 @@ namespace StratifiedEventQueue.Test.States.Nets
         public void When_SimpleWire_Expect_Reference()
         {
             var scheduler = new Scheduler();
-            var a = new Variable<DriveStrengthRange>("a");
-            var b = new Variable<DriveStrengthRange>("b");
             var wire = new WireOr("wire");
-            wire.Assign(a);
-            wire.Assign(b);
+            var driverA = wire.Assign(scheduler);
+            var driverB = wire.Assign(scheduler);
 
             Assert.Equal(new DriveStrengthRange(), wire.Value);
-            a.Update(scheduler, new DriveStrengthRange(Strength.St1));
+
+            driverA.Update(scheduler, new DriveStrengthRange(Strength.St1));
+            scheduler.Process();
             Assert.Equal(new DriveStrengthRange(Strength.St1), wire.Value);
-            b.Update(scheduler, new DriveStrengthRange(Strength.St0));
+            
+            driverB.Update(scheduler, new DriveStrengthRange(Strength.St0));
+            scheduler.Process();
             Assert.Equal(new DriveStrengthRange(Strength.St1), wire.Value);
 
-            a.Update(scheduler, new DriveStrengthRange(Strength.We1));
+            driverA.Update(scheduler, new DriveStrengthRange(Strength.We1));
+            scheduler.Process();
             Assert.Equal(new DriveStrengthRange(Strength.St0), wire.Value);
         }
     }

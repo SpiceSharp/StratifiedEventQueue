@@ -2,26 +2,15 @@
 using StratifiedEventQueue.Simulation;
 using StratifiedEventQueue.States;
 using System;
-using System.Collections.Concurrent;
 
 namespace StratifiedEventQueue.Procedures
 {
+    /// <summary>
+    /// A non-blocking procedural assignment.
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
     public class NonBlockingProceduralAssignment<T> : ProceduralStatement
     {
-        private static readonly ConcurrentQueue<UpdateEvent> _pool =
-            new ConcurrentQueue<UpdateEvent>();
-
-        protected class UpdateEvent : Event
-        {
-            public NonBlockingProceduralAssignment<T> Parent { get; set; }
-            public T Value { get; set; }
-            public override void Execute(IScheduler scheduler)
-            {
-                Parent.Variable.Update(scheduler, Value);
-                _pool.Enqueue(this);
-            }
-        }
-
         /// <summary>
         /// Gets the variable.
         /// </summary>
@@ -52,30 +41,16 @@ namespace StratifiedEventQueue.Procedures
         }
 
         /// <inheritdoc />
-        public override void Execute(IScheduler scheduler)
+        protected override void Execute(IScheduler scheduler)
         {
             var delay = IntraAssignmentDelay?.Invoke() ?? 0;
-            var @event = CreateEvent();
-            @event.Value = Value();
+            var @event = UpdateEvent<T>.Create(Variable, Value());
             scheduler.ScheduleNonBlocking(delay, @event);
 
             // The next procedural statement can already start
             var args = ProceduralStatementEventArgs.Create(scheduler);
             OnExecuted(args);
             args.Release();
-        }
-
-        /// <summary>
-        /// Creates a new update event.
-        /// </summary>
-        /// <returns>The update event.</returns>
-        protected UpdateEvent CreateEvent()
-        {
-            _pool.TryDequeue(out var result);
-            if (result == null)
-                result = new UpdateEvent();
-            result.Parent = this;
-            return result;
         }
     }
 }

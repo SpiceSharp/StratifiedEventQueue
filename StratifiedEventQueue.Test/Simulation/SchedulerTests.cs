@@ -43,10 +43,10 @@ namespace StratifiedEventQueue.Test.Simulation
             var clk = new Variable<bool>("clock");
             clk.Changed += (sender, args) =>
             {
-                scheduler.ScheduleInactive(50, VariableUpdateEvent<bool>.Create(clk, !clk.Value));
+                scheduler.ScheduleInactive(50, UpdateEvent<bool>.Create(clk, !clk.Value));
             };
             scheduler.MaxTime = 1000;
-            scheduler.ScheduleInactive(50, VariableUpdateEvent<bool>.Create(clk, true));
+            scheduler.ScheduleInactive(50, UpdateEvent<bool>.Create(clk, true));
 
             bool expected = false;
             void CheckValue(IScheduler scheduler)
@@ -105,7 +105,7 @@ namespace StratifiedEventQueue.Test.Simulation
                     // already scheduled event
                     nextEvent.Deschedule();
                 }
-                var @event = VariableUpdateEvent<Signal>.Create(output, value);
+                var @event = UpdateEvent<Signal>.Create(output, value);
                 nextEventTime = nextTime;
                 nextEvent = scheduler.ScheduleInactive(delay, @event);
             }
@@ -139,13 +139,13 @@ namespace StratifiedEventQueue.Test.Simulation
             output.Update(scheduler, Signal.L);
 
             // Starts the clock
-            scheduler.ScheduleInactive(5, VariableUpdateEvent<Signal>.Create(clk, Signal.H));
+            scheduler.ScheduleInactive(5, UpdateEvent<Signal>.Create(clk, Signal.H));
 
             // Keeps the clock going
             clk.Changed += (sender, args) =>
             {
                 // Invert the clock
-                args.Scheduler.ScheduleInactive(5, VariableUpdateEvent<Signal>.Create(clk, LogicHelper.Not(clk.Value)));
+                args.Scheduler.ScheduleInactive(5, UpdateEvent<Signal>.Create(clk, LogicHelper.Not(clk.Value)));
             };
 
             // The T-flip-flop definition, with only sensitivity to the clock
@@ -154,7 +154,7 @@ namespace StratifiedEventQueue.Test.Simulation
                 if (args.OldValue == Signal.L && args.State.Value == Signal.H)
                 {
                     // Posedge reached, toggle the output
-                    args.Scheduler.ScheduleInactive(0, VariableUpdateEvent<Signal>.Create(output, LogicHelper.Not(output.Value)));
+                    args.Scheduler.ScheduleInactive(0, UpdateEvent<Signal>.Create(output, LogicHelper.Not(output.Value)));
                 }
             };
 

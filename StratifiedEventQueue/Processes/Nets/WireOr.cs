@@ -5,7 +5,7 @@ namespace StratifiedEventQueue.States.Nets
     /// <summary>
     /// A wor or trior net that performs OR logic in case of conflicting drivers.
     /// </summary>
-    public class WireOr : WiredNet
+    public class WireOr : Net
     {
         /// <summary>
         /// Creates a new <see cref="Wire"/>.

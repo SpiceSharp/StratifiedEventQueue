@@ -73,6 +73,16 @@ namespace StratifiedEventQueue.Simulation
         /// <inheritdoc />
         public void Process()
         {
+            // First empty the active queue
+            while (!_active.IsEmpty)
+            {
+                var a = _active.Dequeue();
+                if (a.IsScheduled)
+                    a.Event.Execute(this);
+                a.Release();
+            }
+
+            // Go to the next point
             while (_tree.Count > 0)
             {
                 var node = _tree.PeekFirst();

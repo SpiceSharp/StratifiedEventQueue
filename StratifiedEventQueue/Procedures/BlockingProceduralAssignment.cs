@@ -58,7 +58,7 @@ namespace StratifiedEventQueue.Procedures
         }
 
         /// <inheritdoc />
-        public override void Execute(IScheduler scheduler)
+        protected override void Execute(IScheduler scheduler)
         {
             // The value should be evaluated immediately
             var value = Value();

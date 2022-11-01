@@ -6,23 +6,46 @@ using System.Collections.Generic;
 namespace StratifiedEventQueue.States.Nets
 {
     /// <summary>
-    /// A net represents wired logic, which can come from multiple drivers.
+    /// A net, which can derive a state come from multiple drivers.
     /// </summary>
-    /// <typeparam name="T">The result type.</typeparam>
-    public abstract class WiredNet : State<DriveStrengthRange>, IState<Signal>
+    public abstract class Net : State<DriveStrengthRange>, IState<Signal>
     {
-        private readonly List<IState<DriveStrengthRange>> _drivers = new List<IState<DriveStrengthRange>>();
+        private readonly List<NetDriver> _drivers = new List<NetDriver>();
         private readonly UpdateEvent _event;
         private Signal _signal;
         private EventNode _nextEvent;
         private ulong _nextEventTime;
         private event EventHandler<StateChangedEventArgs<Signal>> SignalChanged;
+        private Action<IScheduler> _update;
 
-        private class UpdateEvent : Event
+        /// <summary>
+        /// The implementation of <see cref="Driver"/> for a <see cref="Net"/>.
+        /// </summary>
+        protected class NetDriver : Driver
         {
-            private readonly WiredNet _parent;
+            public Net Parent { get; set; }
+
+            /// <summary>
+            /// Gets the value of the driver.
+            /// </summary>
+            public DriveStrengthRange Value { get; private set; }
+
+            /// <inheritdoc />
+            public override void Update(IScheduler scheduler, DriveStrengthRange strength)
+            {
+                Value = strength;
+                Parent?._update(scheduler);
+            }
+        }
+
+        /// <summary>
+        /// An update event dedicated to a <see cref="Net"/>.
+        /// </summary>
+        protected class UpdateEvent : Event
+        {
+            private readonly Net _parent;
             public DriveStrengthRange Value { get; set; }
-            public UpdateEvent(WiredNet parent)
+            public UpdateEvent(Net parent)
             {
                 _parent = parent;
             }
@@ -46,17 +69,17 @@ namespace StratifiedEventQueue.States.Nets
         /// <summary>
         /// Gets the delay for high signals.
         /// </summary>
-        public uint RiseDelay { get; }
+        public Func<uint> RiseDelay { get; }
 
         /// <summary>
         /// Gets the delay for low signals.
         /// </summary>
-        public uint FallDelay { get; }
+        public Func<uint> FallDelay { get; }
 
         /// <summary>
         /// Gets the delay for turning off.
         /// </summary>
-        public uint TurnOffDelay { get; }
+        public Func<uint> TurnOffDelay { get; }
 
         /// <inheritdoc />
         Signal IState<Signal>.Value => _signal;
@@ -69,19 +92,24 @@ namespace StratifiedEventQueue.States.Nets
         }
 
         /// <summary>
-        /// Creates a new <see cref="WiredNet"/>.
+        /// Creates a new <see cref="Net"/>.
         /// </summary>
         /// <param name="name">The name of the net.</param>
         /// <param name="riseDelay">The net delay for rising signals.</param>
         /// <param name="fallDelay">The net delay for falling signals.</param>
         /// <param name="turnOffDelay">The net delay for high-impedant signals.</param>
-        protected WiredNet(string name, uint riseDelay = 0, uint fallDelay = 0, uint turnOffDelay = 0)
+        protected Net(string name,
+            Func<uint> riseDelay = null, Func<uint> fallDelay = null, Func<uint> turnOffDelay = null)
             : base(name)
         {
             RiseDelay = riseDelay;
             FallDelay = fallDelay;
             TurnOffDelay = turnOffDelay;
             _event = new UpdateEvent(this);
+            if (RiseDelay == null && FallDelay == null && TurnOffDelay == null)
+                _update = UpdateZeroDelay;
+            else
+                _update = Update;
         }
 
         /// <summary>
@@ -89,16 +117,15 @@ namespace StratifiedEventQueue.States.Nets
         /// </summary>
         /// <param name="driver">The driver.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="driver"/> is <c>null</c>.</exception>
-        public void Assign(IState<DriveStrengthRange> driver)
+        public Driver Assign(IScheduler scheduler)
         {
-            _drivers.Add(driver ?? throw new ArgumentNullException(nameof(driver)));
-            Update(this, null);
-
-            // Add listener
-            if (RiseDelay == 0 && FallDelay == 0 && TurnOffDelay == 0)
-                driver.Changed += UpdateZeroDelay;
-            else
-                driver.Changed += Update;
+            var driver = new NetDriver()
+            {
+                Parent = this
+            };
+            _drivers.Add(driver);
+            _update(scheduler);
+            return driver;
         }
 
         /// <summary>
@@ -106,20 +133,23 @@ namespace StratifiedEventQueue.States.Nets
         /// </summary>
         /// <param name="driver">The driver.</param>
         /// <exception cref="ArgumentNullException">Thrown if <paramref name="driver"/> is <c>null</c>.</exception>
-        public void Deassign(IState<DriveStrengthRange> driver)
+        public void Deassign(IScheduler scheduler, Driver driver)
         {
-            if (_drivers.Remove(driver ?? throw new ArgumentNullException(nameof(driver))))
+            if (driver is NetDriver netDriver)
             {
-                // The value might have changed
-                Update(this, null);
-                if (RiseDelay == 0 && FallDelay == 0 && TurnOffDelay == 0)
-                    driver.Changed -= UpdateZeroDelay;
-                else
-                    driver.Changed -= Update;
+                if (!ReferenceEquals(netDriver.Parent, this))
+                    throw new ArgumentException();
+                netDriver.Parent = null;
+                _drivers.Remove(netDriver);
+                _update(scheduler);
             }
         }
 
-        protected void UpdateZeroDelay(object sender, StateChangedEventArgs<DriveStrengthRange> args)
+        /// <summary>
+        /// Updates the wired net value.
+        /// </summary>
+        /// <param name="scheduler">The scheduler.</param>
+        protected void UpdateZeroDelay(IScheduler scheduler)
         {
             // Determine the result of the wire
             DriveStrengthRange result;
@@ -133,15 +163,17 @@ namespace StratifiedEventQueue.States.Nets
             }
             if (result == Value)
                 return; // Nothing changes
-            Update(args.Scheduler, result);
+
+            // Schedule the update event in the active queue
+            _event.Value = result;
+            scheduler.Schedule(_event);
         }
 
         /// <summary>
         /// Updates the wired net value.
         /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="args">The event arguments of the driver that changed.</param>
-        protected void Update(object sender, StateChangedEventArgs<DriveStrengthRange> args)
+        /// <param name="scheduler">The scheduler.</param>
+        protected void Update(IScheduler scheduler)
         {
             // Determine the result of the wire
             DriveStrengthRange result;
@@ -161,30 +193,30 @@ namespace StratifiedEventQueue.States.Nets
             switch (result.Logic)
             {
                 case Signal.H:
-                    delay = RiseDelay;
+                    delay = RiseDelay?.Invoke() ?? 0;
                     break;
 
                 case Signal.L:
-                    delay = FallDelay;
+                    delay = FallDelay?.Invoke() ?? 0;
                     break;
 
                 case Signal.Z:
-                    delay = TurnOffDelay;
+                    delay = TurnOffDelay?.Invoke() ?? 0;
                     break;
 
                 default:
                     if (result.Low >= Strength.HiZ0 && result.Low <= Strength.HiZ1)
                         // Signal is at least high-impedant, else driven to a high value
-                        delay = Math.Min(RiseDelay, TurnOffDelay);
+                        delay = Math.Min(RiseDelay?.Invoke() ?? 0, TurnOffDelay?.Invoke() ?? 0);
                     else if (result.High >= Strength.HiZ0 && result.High <= Strength.HiZ1)
                         // Signal is at most high-impedant, else driven to a low value
-                        delay = Math.Min(FallDelay, TurnOffDelay);
+                        delay = Math.Min(FallDelay?.Invoke() ?? 0, TurnOffDelay?.Invoke() ?? 0);
                     else
                         // Signal can be both low, high or high-impedant...
-                        delay = Math.Min(FallDelay, Math.Min(TurnOffDelay, RiseDelay));
+                        delay = Math.Min(FallDelay?.Invoke() ?? 0, Math.Min(TurnOffDelay?.Invoke() ?? 0, RiseDelay?.Invoke() ?? 0));
                     break;
             }
-            ulong nextTime = args.Scheduler.CurrentTime + delay;
+            ulong nextTime = scheduler.CurrentTime + delay;
 
             // If the next event happens before this one, deschedule the next event
             if (nextTime <= _nextEventTime && _nextEvent != null)
@@ -194,7 +226,7 @@ namespace StratifiedEventQueue.States.Nets
             if (result != Value)
             {
                 _event.Value = result;
-                _nextEvent = args.Scheduler.ScheduleInactive(delay, _event);
+                _nextEvent = scheduler.ScheduleInactive(delay, _event);
                 _nextEventTime = nextTime;
             }
             else

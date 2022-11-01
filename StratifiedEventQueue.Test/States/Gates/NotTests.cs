@@ -1,6 +1,7 @@
 ﻿using StratifiedEventQueue.Simulation;
-using StratifiedEventQueue.States.Gates;
+using StratifiedEventQueue.Processes.Gates;
 using StratifiedEventQueue.States;
+using StratifiedEventQueue.States.Nets;
 
 namespace StratifiedEventQueue.Test.States.Gates
 {
@@ -11,16 +12,18 @@ namespace StratifiedEventQueue.Test.States.Gates
         {
             var scheduler = new Scheduler();
             var a = new Variable<Signal>("a");
+            var q = new Wire("q");
 
             // Add the AND gate
-            var q = new Not("not1", "q", a);
+            var gate = new Not("not1", q.Assign(scheduler), a);
 
             var vA = "01XZ".ToLogic();
             var vQ = "10XX".ToLogic();
             for (int i = 0; i < vA.Length; i++)
             {
                 a.Update(scheduler, vA[i]);
-                Assert.Equal(vQ[i], q.Value);
+                scheduler.Process();
+                Assert.Equal(vQ[i], q.Value.Logic);
             }
         }
     }
